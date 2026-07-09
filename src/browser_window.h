@@ -12,7 +12,6 @@
 #include <QAction>
 #include <QMenu>
 #include <QMenuBar>
-#include <QMap>
 
 namespace Frint {
 
@@ -29,16 +28,24 @@ public:
     void removeTab(int index);
 
 private slots:
-    void onNewTabClicked();
-    void onCloseTabClicked(int index);
+    void onNewTab();
+    void onCloseTab(int index);
     void onTabChanged(int index);
     void onUrlChanged(const QUrl &url);
     void onTitleChanged(const QString &title);
     void onLoadStarted();
     void onLoadFinished(bool ok);
     void onLoadProgress(int progress);
-    void onNavigation(const QUrl &url);
     void onAddressBarReturnPressed();
+    void onBack();
+    void onForward();
+    void onReload();
+    void onClearStorage();
+    void onClearSiteData();
+    void onToggleTrackingBlocker();
+    void onToggleHttpsOnly();
+    void onToggleGpc();
+    void onToggleFingerprinting();
 
 private:
     void setupToolBar();
@@ -46,22 +53,28 @@ private:
     void setupMenuBar();
     WebView *currentWebView() const;
     void updateAddressBar(const QUrl &url);
+    void updateNavButtons();
+    void updatePrivacyIndicators();
 
     QTabWidget *m_tabWidget;
     QToolBar *m_toolBar;
     QLineEdit *m_addressBar;
-    QPushButton *m_newTabButton;
-    QPushButton *m_backButton;
-    QPushButton *m_forwardButton;
-    QPushButton *m_reloadButton;
+    QPushButton *m_newTabBtn;
+    QPushButton *m_backBtn;
+    QPushButton *m_forwardBtn;
+    QPushButton *m_reloadBtn;
     QLabel *m_statusLabel;
     QProgressBar *m_progressBar;
+    QLabel *m_privacyIndicator;
 
     QMenu *m_fileMenu;
     QMenu *m_privacyMenu;
 
-    // Keep track of tab URL mappings
-    QMap<int, QUrl> m_tabUrls;
+    // Privacy menu actions (toggleable)
+    QAction *m_trackingAction;
+    QAction *m_httpsAction;
+    QAction *m_gpcAction;
+    QAction *m_fingerprintingAction;
 };
 
 } // namespace Frint

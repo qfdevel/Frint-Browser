@@ -1,4 +1,5 @@
 #include "privacy/gpc_header.h"
+#include <QDebug>
 
 namespace Frint {
 
@@ -13,6 +14,7 @@ GpcHeader::GpcHeader() = default;
 void GpcHeader::setEnabled(bool enabled)
 {
     m_enabled = enabled;
+    qDebug() << "[Frint GpcHeader]" << (enabled ? "Enabled" : "Disabled");
 }
 
 bool GpcHeader::isEnabled() const
@@ -32,9 +34,7 @@ QByteArray GpcHeader::headerValue()
 
 QPair<QByteArray, QByteArray> GpcHeader::header() const
 {
-    if (!m_enabled) {
-        return {};
-    }
+    if (!m_enabled) return {};
     return { headerName(), headerValue() };
 }
 

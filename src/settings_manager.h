@@ -15,14 +15,19 @@ class SettingsManager : public QObject {
 public:
     static SettingsManager &instance();
 
-    // Load default preferences from JSON config
+    // Load default preferences from JSON file
     void loadDefaults(const QString &configPath = QString());
 
-    // Get/set individual settings
+    // Get/set settings with types
     QVariant getValue(const QString &key, const QVariant &defaultValue = QVariant()) const;
     void setValue(const QString &key, const QVariant &value);
 
-    // Convenience methods
+    bool getBool(const QString &key, bool defaultValue = false) const;
+    int getInt(const QString &key, int defaultValue = 0) const;
+    QString getString(const QString &key,
+                      const QString &defaultValue = QString()) const;
+
+    // Privacy convenience accessors
     bool isHttpsOnly() const;
     void setHttpsOnly(bool enabled);
 
@@ -44,19 +49,30 @@ public:
     bool isDohEnabled() const;
     void setDohEnabled(bool enabled);
 
+    bool isReferrerPolicyStrict() const;
+
     QString homePage() const;
     void setHomePage(const QString &url);
 
-    // Sync settings to disk
+    QString searchEngine() const;
+
+    QString dohEndpoint() const;
+    void setDohEndpoint(const QString &url);
+
+    // Persist to disk
     void sync();
 
 signals:
     void settingChanged(const QString &key, const QVariant &value);
 
 private:
-    SettingsManager();
+    SettingsManager(QObject *parent = nullptr);
+    SettingsManager(const SettingsManager &) = delete;
+    SettingsManager &operator=(const SettingsManager &) = delete;
+
     QSettings m_settings;
     QJsonObject m_defaults;
+    bool m_defaultsLoaded = false;
 };
 
 } // namespace Frint

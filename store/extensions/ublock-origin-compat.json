@@ -1,0 +1,14 @@
+{
+    "id": "ublock-origin-compat",
+    "name": "uBlock Origin Compatibility",
+    "version": "1.0.0",
+    "author": "Frint Team",
+    "description": "Enhanced tracker blocking using uBlock Origin's filter lists",
+    "type": "privacy",
+    "scripts": ["ublock-loader.js"],
+    "filters": [
+        "https://easylist.to/easylist/easylist.txt",
+        "https://easylist.to/easylist/easyprivacy.txt"
+    ],
+    "permissions": ["webRequest", "webRequestBlocking", "storage"]
+}

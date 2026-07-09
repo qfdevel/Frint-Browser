@@ -4,6 +4,7 @@
 #include <QString>
 #include <QStringList>
 #include <QUrl>
+#include <QSet>
 
 namespace Frint {
 
@@ -11,13 +12,20 @@ class TrackingBlocker {
 public:
     static TrackingBlocker &instance();
 
+    // Check if a request URL is a known tracker
     bool isTracker(const QUrl &requestUrl, const QUrl &pageUrl) const;
+
+    // Check if a cookie domain should be blocked
+    bool isTrackingCookie(const QString &cookieDomain, const QUrl &pageUrl) const;
+
+    // Get all blocked domains
     QStringList blockedDomains() const;
-    void addCustomDomain(const QString &domain);
-    void removeCustomDomain(const QString &domain);
 
     void setEnabled(bool enabled);
     bool isEnabled() const;
+
+    void addCustomDomain(const QString &domain);
+    void removeCustomDomain(const QString &domain);
 
 private:
     TrackingBlocker();

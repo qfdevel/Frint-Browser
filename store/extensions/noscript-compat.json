@@ -1,0 +1,15 @@
+{
+    "id": "noscript-compat",
+    "name": "NoScript Compatibility",
+    "version": "1.0.0",
+    "author": "Frint Team",
+    "description": "Per-domain script blocking controls that let you whitelist trusted sites",
+    "type": "privacy",
+    "permissions": ["webRequest", "webRequestBlocking", "storage"],
+    "default_action": "block",
+    "allow_list": [
+        "duckduckgo.com",
+        "github.com",
+        "wikipedia.org"
+    ]
+}

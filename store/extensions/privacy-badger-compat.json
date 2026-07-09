@@ -1,0 +1,16 @@
+{
+    "id": "privacy-badger-compat",
+    "name": "Privacy Badger Compatibility",
+    "version": "1.0.0",
+    "author": "Frint Team",
+    "description": "Learning-based tracker blocking that automatically detects and blocks trackers",
+    "type": "privacy",
+    "permissions": ["webRequest", "webRequestBlocking", "storage", "learning"],
+    "learning_enabled": true,
+    "default_action": "block",
+    "yellowlist": [
+        "cdn.jsdelivr.net",
+        "fonts.googleapis.com",
+        "code.jquery.com"
+    ]
+}

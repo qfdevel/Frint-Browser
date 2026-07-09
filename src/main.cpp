@@ -13,30 +13,38 @@ int main(int argc, char *argv[])
     app.setOrganizationName("FrintBrowser");
     app.setOrganizationDomain("frintbrowser.dev");
 
-    // Command line options
+    // ── Command line parsing ──────────────────────────────────────────
     QCommandLineParser parser;
-    parser.setApplicationDescription("Frint Browser - Privacy-first web browser");
+    parser.setApplicationDescription(
+        "Frint Browser - Privacy-first, telemetry-free web browser");
     parser.addHelpOption();
     parser.addVersionOption();
+
+    parser.addOption(QCommandLineOption("new-tab", "Open a new tab with the specified URL",
+                                        "url"));
+
+    parser.addOption(QCommandLineOption("private", "Open a private browsing window"));
+
     parser.addPositionalArgument("url", "URL to open", "[url]");
+
     parser.process(app);
 
-    // Initialize settings (secure defaults loaded in BrowserWindow constructor)
+    // ── Initialize settings ───────────────────────────────────────────
     auto &settings = Frint::SettingsManager::instance();
     Q_UNUSED(settings);
 
-    // Create and show browser window
-    Frint::BrowserWindow browserWindow;
-    browserWindow.show();
+    // ── Create window ─────────────────────────────────────────────────
+    auto *window = new Frint::BrowserWindow();
+    window->show();
 
-    // Open URL from command line if provided
+    // ── Handle CLI URL ────────────────────────────────────────────────
     const QStringList args = parser.positionalArguments();
     if (!args.isEmpty()) {
         QUrl url(args.first());
         if (!url.scheme().isEmpty()) {
-            browserWindow.addTab(url);
+            window->addTab(url);
         } else {
-            browserWindow.addTab(QUrl("https://" + args.first()));
+            window->addTab(QUrl("https://" + args.first()));
         }
     }
 

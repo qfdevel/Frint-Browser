@@ -1,0 +1,30 @@
+name: Validate Store Submission
+
+on:
+  pull_request:
+    paths:
+      - 'store/**'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run validation
+        run: python store/validate.py
+      - name: Verify JSON format
+        run: |
+          for f in $(find store -name '*.json'); do
+            python3 -c "import json; json.load(open('$f'))" && echo "✅ $f" || echo "❌ $f"
+          done
+      - name: Check for malicious content
+        run: |
+          # Check no scripts in themes
+          if grep -r "script>" store/themes/ 2>/dev/null; then
+            echo "❌ Themes must not contain scripts"
+            exit 1
+          fi
+          echo "✅ No malicious content found"

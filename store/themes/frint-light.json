@@ -1,0 +1,17 @@
+{
+    "id": "frint-light",
+    "name": "Frint Light",
+    "version": "1.0.0",
+    "author": "Frint Team",
+    "colors": {
+        "background": "#eff1f5",
+        "foreground": "#4c4f69",
+        "accent": "#7287fd",
+        "success": "#40a02b",
+        "warning": "#df8e1d",
+        "error": "#d20f39",
+        "surface0": "#ccd0da",
+        "surface1": "#bcc0cc",
+        "surface2": "#acb0be"
+    }
+}

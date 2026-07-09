@@ -12,14 +12,19 @@ public:
         StrictOriginWhenCrossOrigin,
         NoReferrer,
         SameOrigin,
-        OriginWhenCrossOrigin
+        OriginWhenCrossOrigin,
+        StrictOrigin,
+        Origin,
+        NoReferrerWhenDowngrade
     };
 
     static ReferrerPolicy &instance();
 
     void setPolicy(Policy policy);
     Policy policy() const;
+    QString policyName() const;
 
+    // Get the referrer for a navigation from sourceUrl to targetUrl
     QString getReferrer(const QUrl &targetUrl, const QUrl &sourceUrl) const;
 
 private:

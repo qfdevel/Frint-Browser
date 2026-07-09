@@ -10,12 +10,14 @@ class StoragePartition {
 public:
     static StoragePartition &instance();
 
-    // Get a partition ID for a given origin
-    // Each origin gets its own storage sandbox
+    // Get a unique partition ID for a URL's origin
     QString partitionIdForOrigin(const QUrl &url) const;
 
-    // Get the storage path for a given origin
+    // Get the filesystem path for an origin's storage
     QString storagePathForOrigin(const QUrl &url) const;
+
+    // Ensure the partition directory exists
+    QString ensurePartition(const QUrl &url);
 
     // Clear all storage partitions
     void clearAll();
@@ -23,12 +25,15 @@ public:
     // Clear storage for a specific origin
     void clearForOrigin(const QUrl &url);
 
-    // Set the base storage directory
+    // Set/get base path (default: AppLocalDataLocation/frint/partitions)
     void setBasePath(const QString &path);
     QString basePath() const;
 
 private:
     StoragePartition();
+    StoragePartition(const StoragePartition &) = delete;
+    StoragePartition &operator=(const StoragePartition &) = delete;
+
     QString m_basePath;
 };
 

@@ -3,6 +3,7 @@
 
 #include <QString>
 #include <QStringList>
+#include <QJsonObject>
 
 namespace Frint {
 
@@ -13,27 +14,55 @@ public:
     void setEnabled(bool enabled);
     bool isEnabled() const;
 
-    // Returns a fixed/spoofed font list (prevents font enumeration)
+    // Font fingerprinting
     QStringList spoofedFontFamilies() const;
+    void setSpoofedFonts(const QStringList &fonts);
 
-    // Returns a consistent spoofed canvas fingerprint hash
+    // Canvas fingerprinting
     QString spoofedCanvasFingerprint() const;
+    void setCanvasNoiseEnabled(bool enabled);
 
-    // Returns a spoofed user agent
-    QString spoofedUserAgent() const;
-
-    // Spoofed screen dimensions (rounded)
+    // Screen resolution
     int spoofedScreenWidth() const;
     int spoofedScreenHeight() const;
+    void setSpoofedResolution(int width, int height);
 
-    // Spoofed timezone offset (round to nearest hour)
+    // Timezone
     int spoofedTimezoneOffset() const;
+    void setSpoofedTimezone(int offsetMinutes);
+
+    // Language
+    QString spoofedLanguage() const;
+    void setSpoofedLanguage(const QString &lang);
+
+    // Hardware concurrency
+    int spoofedHardwareConcurrency() const;
+    void setSpoofedConcurrency(int count);
+
+    // Device memory
+    double spoofedDeviceMemory() const;
+    void setSpoofedMemory(double gb);
+
+    // User-Agent
+    QString spoofedUserAgent() const;
+    void setSpoofedUserAgent(const QString &ua);
+
+    // Apply all spoofing settings from JSON config
+    void applySettings(const QJsonObject &settings);
 
 private:
     FingerprintingDefender();
-    bool m_enabled = true;
 
-    static QStringList s_fontFamilies;
+    bool m_enabled = true;
+    QStringList m_spoofedFonts;
+    QString m_spoofedCanvasHash;
+    int m_spoofedWidth = 1920;
+    int m_spoofedHeight = 1080;
+    int m_spoofedTimezoneOffset = 0;
+    QString m_spoofedLanguage = "en-US";
+    int m_spoofedConcurrency = 4;
+    double m_spoofedMemory = 8.0;
+    QString m_spoofedUA;
 };
 
 } // namespace Frint

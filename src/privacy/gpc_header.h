@@ -13,13 +13,11 @@ public:
     void setEnabled(bool enabled);
     bool isEnabled() const;
 
-    // Returns the "Sec-GPC: 1" header
+    // Returns ("Sec-GPC", "1")
     QPair<QByteArray, QByteArray> header() const;
 
-    // Returns HTTP header name
+    // Static helpers
     static QByteArray headerName();
-
-    // Returns HTTP header value
     static QByteArray headerValue();
 
 private:

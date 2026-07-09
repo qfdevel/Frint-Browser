@@ -1,30 +1,43 @@
 {
     "_comment": "Frint Browser - Default Privacy Preferences",
+    "_version": "0.1.0",
 
     "https_only": true,
     "third_party_cookies_blocked": true,
     "fingerprinting_protection": true,
+    "block_popups": true,
+    "do_not_track": true,
+    "safe_browsing_enabled": true,
+    "autoplay_blocked": true,
+    "webgl_disabled": false,
+    "javascript_enabled": true,
+
+    "default_search_engine": "DuckDuckGo",
+    "search_engine": "https://duckduckgo.com/?q=",
+    "home_page": "about:blank",
+    "clear_on_exit": true,
     "gpc_enabled": true,
-    "tracking_blocker": true,
-    "doh_enabled": true,
-    "clear_on_exit": false,
 
     "referrer_policy": "strict-origin-when-cross-origin",
+    "doh_enabled": true,
     "doh_endpoint": "https://cloudflare-dns.com/dns-query",
+    "tracking_blocker": true,
 
-    "home_page": "about:blank",
-    "search_engine": "https://duckduckgo.com/?q=",
+    "font_spoofing_enabled": true,
+    "canvas_fingerprinting_defense_enabled": true,
+    "screen_resolution_spoofing_enabled": true,
+    "timezone_spoofing_enabled": true,
+    "user_agent_spoofing_enabled": true,
 
-    "javascript_enabled": true,
-    "cookies_enabled": true,
+    "theme": "dark",
+    "theme_color": "#1e1e2e",
+    "font_size": 16,
+    "zoom_level": 1.0,
 
     "max_tabs": 100,
     "download_path": "",
 
-    "user_agent_spoofing": true,
     "webrtc_leak_protection": true,
 
-    "theme": "dark",
-    "font_size": 16,
-    "zoom_level": 1.0
+    "url_cleaner_enabled": true
 }

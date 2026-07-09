@@ -9,10 +9,21 @@ namespace Frint {
 
 class UrlCleaner {
 public:
+    // Remove all known tracking query parameters from the URL
     static QUrl cleanTrackingParams(const QUrl &url);
 
+    // Check if a query parameter is a known tracking param
+    static bool isTrackingParam(const QString &paramName);
+
+    // Get the full list of known tracking parameters
+    static QStringList knownTrackingParams();
+
 private:
-    static const QStringList s_trackingParams;
+    UrlCleaner() = delete;
+
+    static QStringList s_trackingParams;
+    static QStringList s_utmVariants;
+    static QStringList s_adPlatformParams;
 };
 
 } // namespace Frint

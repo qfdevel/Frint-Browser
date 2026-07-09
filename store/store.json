@@ -1,0 +1,93 @@
+{
+    "name": "Frint Plugin & Theme Store",
+    "version": "1.0.0",
+    "description": "Community-driven themes and privacy extensions for Frint Browser",
+    "website": "https://frintbrowser.dev/store",
+    "repository": "https://github.com/frint-browser/Frint-Plugin-Theme-Store",
+    "themes": [
+        {
+            "id": "frint-dark",
+            "name": "Frint Dark (Default)",
+            "version": "1.0.0",
+            "author": "Frint Team",
+            "description": "Default dark theme with Catppuccin Mocha-inspired colors",
+            "compatibility": ">=0.1.0",
+            "colors": {
+                "background": "#1e1e2e",
+                "foreground": "#cdd6f4",
+                "accent": "#cba6f7",
+                "success": "#a6e3a1",
+                "warning": "#f9e2af",
+                "error": "#f38ba8",
+                "surface0": "#313244",
+                "surface1": "#45475a",
+                "surface2": "#585b70"
+            },
+            "file": "themes/frint-dark.json"
+        },
+        {
+            "id": "frint-light",
+            "name": "Frint Light",
+            "version": "1.0.0",
+            "author": "Frint Team",
+            "description": "Clean light theme for daytime browsing",
+            "compatibility": ">=0.1.0",
+            "colors": {
+                "background": "#eff1f5",
+                "foreground": "#4c4f69",
+                "accent": "#7287fd",
+                "success": "#40a02b",
+                "warning": "#df8e1d",
+                "error": "#d20f39",
+                "surface0": "#ccd0da",
+                "surface1": "#bcc0cc",
+                "surface2": "#acb0be"
+            },
+            "file": "themes/frint-light.json"
+        },
+        {
+            "id": "nord",
+            "name": "Nord",
+            "version": "1.0.0",
+            "author": "Nord Community",
+            "description": "Arctic, north-bluish clean theme",
+            "compatibility": ">=0.1.0",
+            "file": "themes/nord.json"
+        }
+    ],
+    "extensions": [
+        {
+            "id": "ublock-origin-compat",
+            "name": "uBlock Origin Compatibility",
+            "version": "1.0.0",
+            "author": "Frint Team",
+            "description": "Enhanced tracker blocking using uBlock Origin's filter lists",
+            "type": "privacy",
+            "compatibility": ">=0.1.0",
+            "permissions": ["webRequest", "webRequestBlocking", "storage"],
+            "file": "extensions/ublock-origin-compat.json"
+        },
+        {
+            "id": "noscript-compat",
+            "name": "NoScript Compatibility",
+            "version": "1.0.0",
+            "author": "Frint Team",
+            "description": "Per-domain script blocking controls",
+            "type": "privacy",
+            "compatibility": ">=0.1.0",
+            "permissions": ["webRequest", "storage"],
+            "file": "extensions/noscript-compat.json"
+        },
+        {
+            "id": "privacy-badger-compat",
+            "name": "Privacy Badger Compatibility",
+            "version": "1.0.0",
+            "author": "Frint Team",
+            "description": "Learning-based tracker blocking that adapts to your browsing",
+            "type": "privacy",
+            "compatibility": ">=0.1.0",
+            "permissions": ["webRequest", "storage", "learning"],
+            "file": "extensions/privacy-badger-compat.json"
+        }
+    ]
+}

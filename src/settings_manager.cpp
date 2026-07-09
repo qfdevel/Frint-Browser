@@ -14,8 +14,8 @@ SettingsManager &SettingsManager::instance()
     return s_instance;
 }
 
-SettingsManager::SettingsManager()
-    : QObject(nullptr)
+SettingsManager::SettingsManager(QObject *parent)
+    : QObject(parent)
     , m_settings(QSettings::IniFormat, QSettings::UserScope,
                  "FrintBrowser", "FrintBrowser")
 {
@@ -26,14 +26,13 @@ void SettingsManager::loadDefaults(const QString &configPath)
     QString path = configPath;
 
     if (path.isEmpty()) {
-        // Try to find configs relative to the executable
         QString appDir = QCoreApplication::applicationDirPath();
         QStringList searchPaths = {
             appDir + "/../configs/default_prefs.json",
             appDir + "/configs/default_prefs.json",
             QDir::currentPath() + "/configs/default_prefs.json",
             QStandardPaths::locate(QStandardPaths::AppConfigLocation,
-                                   "default_prefs.json")
+                                   "default_prefs.json"),
         };
 
         for (const QString &sp : searchPaths) {
@@ -44,14 +43,16 @@ void SettingsManager::loadDefaults(const QString &configPath)
         }
     }
 
-    if (path.isEmpty()) {
-        qWarning() << "[Frint] Could not find default_prefs.json, using built-in defaults";
+    if (path.isEmpty() || !QFile::exists(path)) {
+        qWarning() << "[Frint Settings] default_prefs.json not found,"
+                    << "using hardcoded defaults";
+        // Set some sensible defaults directly
         return;
     }
 
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly)) {
-        qWarning() << "[Frint] Failed to open" << path;
+        qWarning() << "[Frint Settings] Cannot open" << path;
         return;
     }
 
@@ -62,27 +63,33 @@ void SettingsManager::loadDefaults(const QString &configPath)
     QJsonDocument doc = QJsonDocument::fromJson(data, &error);
 
     if (error.error != QJsonParseError::NoError) {
-        qWarning() << "[Frint] JSON parse error in" << path << ":" << error.errorString();
+        qWarning() << "[Frint Settings] JSON parse error:" << error.errorString();
         return;
     }
 
     if (!doc.isObject()) {
-        qWarning() << "[Frint] Expected JSON object in" << path;
+        qWarning() << "[Frint Settings] Expected JSON object";
         return;
     }
 
     m_defaults = doc.object();
-    qDebug() << "[Frint] Loaded" << m_defaults.size() << "default settings from" << path;
 
-    // Apply defaults for any keys not already set
+    // Apply defaults for unset keys
     for (auto it = m_defaults.constBegin(); it != m_defaults.constEnd(); ++it) {
         if (!m_settings.contains(it.key())) {
             m_settings.setValue(it.key(), it.value().toVariant());
         }
     }
+
+    m_defaultsLoaded = true;
+    qDebug() << "[Frint Settings] Loaded" << m_defaults.size()
+             << "default settings from" << path;
 }
 
-QVariant SettingsManager::getValue(const QString &key, const QVariant &defaultValue) const
+// ── Generic get/set ──────────────────────────────────────────────────────
+
+QVariant SettingsManager::getValue(const QString &key,
+                                   const QVariant &defaultValue) const
 {
     if (m_settings.contains(key)) {
         return m_settings.value(key);
@@ -99,9 +106,27 @@ void SettingsManager::setValue(const QString &key, const QVariant &value)
     emit settingChanged(key, value);
 }
 
+bool SettingsManager::getBool(const QString &key, bool defaultValue) const
+{
+    return getValue(key, defaultValue).toBool();
+}
+
+int SettingsManager::getInt(const QString &key, int defaultValue) const
+{
+    return getValue(key, defaultValue).toInt();
+}
+
+QString SettingsManager::getString(const QString &key,
+                                   const QString &defaultValue) const
+{
+    return getValue(key, defaultValue).toString();
+}
+
+// ── Privacy convenience methods ──────────────────────────────────────────
+
 bool SettingsManager::isHttpsOnly() const
 {
-    return getValue("https_only", true).toBool();
+    return getBool("https_only", true);
 }
 
 void SettingsManager::setHttpsOnly(bool enabled)
@@ -111,7 +136,7 @@ void SettingsManager::setHttpsOnly(bool enabled)
 
 bool SettingsManager::areThirdPartyCookiesBlocked() const
 {
-    return getValue("third_party_cookies_blocked", true).toBool();
+    return getBool("third_party_cookies_blocked", true);
 }
 
 void SettingsManager::setThirdPartyCookiesBlocked(bool blocked)
@@ -121,7 +146,7 @@ void SettingsManager::setThirdPartyCookiesBlocked(bool blocked)
 
 bool SettingsManager::isFingerprintingProtectionEnabled() const
 {
-    return getValue("fingerprinting_protection", true).toBool();
+    return getBool("fingerprinting_protection", true);
 }
 
 void SettingsManager::setFingerprintingProtection(bool enabled)
@@ -131,7 +156,7 @@ void SettingsManager::setFingerprintingProtection(bool enabled)
 
 bool SettingsManager::isGpcEnabled() const
 {
-    return getValue("gpc_enabled", true).toBool();
+    return getBool("gpc_enabled", true);
 }
 
 void SettingsManager::setGpcEnabled(bool enabled)
@@ -141,7 +166,7 @@ void SettingsManager::setGpcEnabled(bool enabled)
 
 bool SettingsManager::isClearOnExit() const
 {
-    return getValue("clear_on_exit", false).toBool();
+    return getBool("clear_on_exit", true);
 }
 
 void SettingsManager::setClearOnExit(bool enabled)
@@ -151,7 +176,7 @@ void SettingsManager::setClearOnExit(bool enabled)
 
 bool SettingsManager::isTrackingBlockerEnabled() const
 {
-    return getValue("tracking_blocker", true).toBool();
+    return getBool("tracking_blocker", true);
 }
 
 void SettingsManager::setTrackingBlockerEnabled(bool enabled)
@@ -161,7 +186,7 @@ void SettingsManager::setTrackingBlockerEnabled(bool enabled)
 
 bool SettingsManager::isDohEnabled() const
 {
-    return getValue("doh_enabled", true).toBool();
+    return getBool("doh_enabled", true);
 }
 
 void SettingsManager::setDohEnabled(bool enabled)
@@ -169,14 +194,37 @@ void SettingsManager::setDohEnabled(bool enabled)
     setValue("doh_enabled", enabled);
 }
 
+bool SettingsManager::isReferrerPolicyStrict() const
+{
+    return getString("referrer_policy", "strict-origin-when-cross-origin")
+           == "strict-origin-when-cross-origin";
+}
+
 QString SettingsManager::homePage() const
 {
-    return getValue("home_page", "about:blank").toString();
+    return getString("home_page", "about:blank");
 }
 
 void SettingsManager::setHomePage(const QString &url)
 {
     setValue("home_page", url);
+}
+
+QString SettingsManager::searchEngine() const
+{
+    return getString("search_engine",
+                     "https://duckduckgo.com/?q=");
+}
+
+QString SettingsManager::dohEndpoint() const
+{
+    return getString("doh_endpoint",
+                     "https://cloudflare-dns.com/dns-query");
+}
+
+void SettingsManager::setDohEndpoint(const QString &url)
+{
+    setValue("doh_endpoint", url);
 }
 
 void SettingsManager::sync()

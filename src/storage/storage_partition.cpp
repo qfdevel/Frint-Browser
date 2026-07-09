@@ -2,6 +2,7 @@
 #include <QCryptographicHash>
 #include <QDir>
 #include <QStandardPaths>
+#include <QDebug>
 
 namespace Frint {
 
@@ -12,14 +13,16 @@ StoragePartition &StoragePartition::instance()
 }
 
 StoragePartition::StoragePartition()
-    : m_basePath(QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation)
-                 + "/partitions")
+    : m_basePath(QStandardPaths::writableLocation(
+                     QStandardPaths::AppLocalDataLocation)
+                 + "/frint/partitions")
 {
 }
 
 void StoragePartition::setBasePath(const QString &path)
 {
     m_basePath = path;
+    qDebug() << "[Frint StoragePartition] Base path:" << m_basePath;
 }
 
 QString StoragePartition::basePath() const
@@ -29,33 +32,40 @@ QString StoragePartition::basePath() const
 
 QString StoragePartition::partitionIdForOrigin(const QUrl &url) const
 {
-    if (!url.isValid()) {
+    if (!url.isValid() || url.host().isEmpty()) {
         return "null-origin";
     }
 
-    // Create a unique ID based on scheme + host + port
+    // Build origin key: scheme + "://" + host [+ ":" + port]
+    int defaultPort = (url.scheme() == "https") ? 443
+                    : (url.scheme() == "http")  ? 80 : -1;
     QString originKey = url.scheme() + "://" + url.host();
-    if (url.port() > 0) {
+    if (url.port() > 0 && url.port() != defaultPort) {
         originKey += ":" + QString::number(url.port());
     }
 
-    // Hash the origin to create a safe directory name
+    // SHA-256 hash for safe directory name
     QByteArray hash = QCryptographicHash::hash(
         originKey.toUtf8(), QCryptographicHash::Sha256);
-    return hash.toHex().left(32);
+
+    // Use first 16 hex chars as partition ID
+    return hash.toHex().left(16);
 }
 
 QString StoragePartition::storagePathForOrigin(const QUrl &url) const
 {
-    QString partitionId = partitionIdForOrigin(url);
-    QString path = m_basePath + "/" + partitionId;
+    return m_basePath + "/" + partitionIdForOrigin(url);
+}
 
-    // Ensure the directory exists
+QString StoragePartition::ensurePartition(const QUrl &url)
+{
+    QString path = storagePathForOrigin(url);
     QDir dir(path);
     if (!dir.exists()) {
         dir.mkpath(".");
+        qDebug() << "[Frint StoragePartition] Created partition:" << path
+                 << "for origin:" << url.scheme() + "://" + url.host();
     }
-
     return path;
 }
 
@@ -63,7 +73,9 @@ void StoragePartition::clearAll()
 {
     QDir dir(m_basePath);
     if (dir.exists()) {
-        dir.removeRecursively();
+        if (dir.removeRecursively()) {
+            qDebug() << "[Frint StoragePartition] All partitions cleared";
+        }
     }
 }
 
@@ -72,7 +84,10 @@ void StoragePartition::clearForOrigin(const QUrl &url)
     QString path = storagePathForOrigin(url);
     QDir dir(path);
     if (dir.exists()) {
-        dir.removeRecursively();
+        if (dir.removeRecursively()) {
+            qDebug() << "[Frint StoragePartition] Cleared partition for:"
+                     << url.scheme() + "://" + url.host();
+        }
     }
 }
 

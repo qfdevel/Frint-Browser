@@ -1,0 +1,17 @@
+{
+    "id": "nord",
+    "name": "Nord",
+    "version": "1.0.0",
+    "author": "Nord Community",
+    "colors": {
+        "background": "#2e3440",
+        "foreground": "#d8dee9",
+        "accent": "#88c0d0",
+        "success": "#a3be8c",
+        "warning": "#ebcb8b",
+        "error": "#bf616a",
+        "surface0": "#3b4252",
+        "surface1": "#434c5e",
+        "surface2": "#4c566a"
+    }
+}

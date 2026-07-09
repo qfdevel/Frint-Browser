@@ -1,50 +1,58 @@
-# Build directories
+# Build outputs
+bin/
 build/
 Build/
-cmake-build*/
+cmake-build-*/
+out/
 
-# Object files
+# Object / library files
 *.o
 *.obj
 *.a
 *.so
-*.dll
 *.dylib
+*.dll
 *.lib
 *.exp
-
-# Compiled binaries
-*.exe
-*.out
-*.app
+*.pdb
+*.ilk
 
 # CMake generated
 CMakeCache.txt
 CMakeFiles/
 cmake_install.cmake
 Makefile
-ninja.build
 *.ninja
+.ninja_*
+CMakeScripts/
 
 # IDE files
 .idea/
-*.user
-*.pro.user*
 .vscode/
+*.pro.user*
+*.user
 *.swp
 *.swo
+*~
 
 # Qt Creator
 *.autosave
 *.kdevses
+moc_*.cpp
+qrc_*.cpp
+ui_*.h
 
 # OS files
 .DS_Store
 Thumbs.db
+.directory
 
-# Local settings overrides
-configs/*.local.json
-
-# Memory / runtime
+# Log / runtime files
 *.log
 core
+core.*
+vgcore.*
+
+# Python bytecode
+__pycache__/
+*.py[cod]

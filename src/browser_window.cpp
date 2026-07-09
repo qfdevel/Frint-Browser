@@ -1,12 +1,15 @@
 #include "browser_window.h"
 #include "web_view.h"
 #include "settings_manager.h"
+#include "privacy/tracking_blocker.h"
+#include "privacy/gpc_header.h"
+#include "privacy/fingerprinting_defender.h"
 #include "storage/storage_partition.h"
 
 #include <QApplication>
-#include <QVBoxLayout>
 #include <QMessageBox>
 #include <QDebug>
+#include <QClipboard>
 
 namespace Frint {
 
@@ -17,31 +20,32 @@ BrowserWindow::BrowserWindow(QWidget *parent)
     resize(1280, 800);
     setMinimumSize(640, 480);
 
-    // Central tab widget
+    // ── Tab widget ─────────────────────────────────────────────────────
     m_tabWidget = new QTabWidget(this);
     m_tabWidget->setTabsClosable(true);
     m_tabWidget->setMovable(true);
     m_tabWidget->setDocumentMode(true);
+    m_tabWidget->setElideMode(Qt::ElideRight);
     setCentralWidget(m_tabWidget);
 
+    connect(m_tabWidget, &QTabWidget::currentChanged,
+            this, &BrowserWindow::onTabChanged);
+    connect(m_tabWidget, &QTabWidget::tabCloseRequested,
+            this, &BrowserWindow::onCloseTab);
+
+    // ── UI setup ──────────────────────────────────────────────────────
     setupMenuBar();
     setupToolBar();
     setupStatusBar();
 
-    // Signals
-    connect(m_tabWidget, &QTabWidget::currentChanged,
-            this, &BrowserWindow::onTabChanged);
-    connect(m_tabWidget, &QTabWidget::tabCloseRequested,
-            this, &BrowserWindow::onCloseTabClicked);
-
-    // Load settings
+    // ── Load settings ──────────────────────────────────────────────────
     auto &settings = SettingsManager::instance();
-#ifdef FRINT_SECURE_DEFAULTS
     settings.loadDefaults();
-#endif
 
-    // Open default tab
+    // ── Initial tab ────────────────────────────────────────────────────
     addTab(QUrl(settings.homePage()));
+
+    updatePrivacyIndicators();
 }
 
 BrowserWindow::~BrowserWindow()
@@ -53,65 +57,65 @@ BrowserWindow::~BrowserWindow()
     settings.sync();
 }
 
+// ── Menu bar ────────────────────────────────────────────────────────────
+
 void BrowserWindow::setupMenuBar()
 {
     // File menu
     m_fileMenu = menuBar()->addMenu("&File");
 
-    QAction *newTabAction = m_fileMenu->addAction("&New Tab");
-    newTabAction->setShortcut(QKeySequence::AddTab);
-    connect(newTabAction, &QAction::triggered, this, &BrowserWindow::onNewTabClicked);
+    QAction *newTab = m_fileMenu->addAction("&New Tab");
+    newTab->setShortcut(QKeySequence::AddTab);
+    connect(newTab, &QAction::triggered, this, &BrowserWindow::onNewTab);
 
-    QAction *closeTabAction = m_fileMenu->addAction("&Close Tab");
-    closeTabAction->setShortcut(QKeySequence::Close);
-    connect(closeTabAction, &QAction::triggered, this, [this]() {
+    QAction *closeTab = m_fileMenu->addAction("&Close Tab");
+    closeTab->setShortcut(QKeySequence::Close);
+    connect(closeTab, &QAction::triggered, this, [this]() {
         int idx = m_tabWidget->currentIndex();
-        if (idx >= 0) {
-            onCloseTabClicked(idx);
-        }
+        if (idx >= 0) onCloseTab(idx);
     });
 
-    QAction *quitAction = m_fileMenu->addAction("&Quit");
-    quitAction->setShortcut(QKeySequence::Quit);
-    connect(quitAction, &QAction::triggered, qApp, &QApplication::quit);
+    m_fileMenu->addSeparator();
+
+    QAction *quit = m_fileMenu->addAction("&Quit");
+    quit->setShortcut(QKeySequence::Quit);
+    connect(quit, &QAction::triggered, qApp, &QApplication::quit);
 
     // Privacy menu
     m_privacyMenu = menuBar()->addMenu("&Privacy");
 
-    QAction *clearStorageAction = m_privacyMenu->addAction("Clear All &Storage");
-    connect(clearStorageAction, &QAction::triggered, this, [this]() {
-        StoragePartition::instance().clearAll();
-        statusBar()->showMessage("All storage cleared", 3000);
-    });
+    m_trackingAction = m_privacyMenu->addAction("&Tracker Blocker");
+    m_trackingAction->setCheckable(true);
+    connect(m_trackingAction, &QAction::triggered,
+            this, &BrowserWindow::onToggleTrackingBlocker);
 
-    QAction *clearSiteAction = m_privacyMenu->addAction("Clear Site &Data");
-    connect(clearSiteAction, &QAction::triggered, this, [this]() {
-        WebView *wv = currentWebView();
-        if (wv) {
-            StoragePartition::instance().clearForOrigin(wv->currentUrl());
-            statusBar()->showMessage("Site data cleared for "
-                                     + wv->currentUrl().host(), 3000);
-        }
-    });
+    m_httpsAction = m_privacyMenu->addAction("HTTPS-&Only Mode");
+    m_httpsAction->setCheckable(true);
+    connect(m_httpsAction, &QAction::triggered,
+            this, &BrowserWindow::onToggleHttpsOnly);
+
+    m_gpcAction = m_privacyMenu->addAction("&Global Privacy Control");
+    m_gpcAction->setCheckable(true);
+    connect(m_gpcAction, &QAction::triggered,
+            this, &BrowserWindow::onToggleGpc);
+
+    m_fingerprintingAction = m_privacyMenu->addAction("&Fingerprinting Defense");
+    m_fingerprintingAction->setCheckable(true);
+    connect(m_fingerprintingAction, &QAction::triggered,
+            this, &BrowserWindow::onToggleFingerprinting);
 
     m_privacyMenu->addSeparator();
 
-    QAction *settingsAction = m_privacyMenu->addAction("&Privacy Settings...");
-    connect(settingsAction, &QAction::triggered, this, [this]() {
-        QMessageBox::information(this, "Privacy Settings",
-            "Frint Browser Privacy Features:\n\n"
-            "\u2713 HTTPS-Only Mode\n"
-            "\u2713 Third-Party Cookie Blocking\n"
-            "\u2713 Tracking Parameter Removal\n"
-            "\u2713 DNS-over-HTTPS (Cloudflare)\n"
-            "\u2713 Global Privacy Control (Sec-GPC: 1)\n"
-            "\u2713 Referrer Policy (Strict Origin)\n"
-            "\u2713 Fingerprinting Protection\n"
-            "\u2713 Tracker Blocker\n"
-            "\u2713 Storage Partitioning\n\n"
-            "Configure via configs/default_prefs.json");
-    });
+    QAction *clearStorage = m_privacyMenu->addAction("Clear All &Storage");
+    connect(clearStorage, &QAction::triggered,
+            this, &BrowserWindow::onClearStorage);
+
+    QAction *clearSite = m_privacyMenu->addAction("Clear Site &Data");
+    connect(clearSite, &QAction::triggered,
+            this, &BrowserWindow::onClearSiteData);
 }
+
+// ── Toolbar ─────────────────────────────────────────────────────────────
 
 void BrowserWindow::setupToolBar()
 {
@@ -121,78 +125,84 @@ void BrowserWindow::setupToolBar()
     addToolBar(m_toolBar);
 
     // Navigation buttons
-    m_backButton = new QPushButton("\u2190", this);
-    m_backButton->setToolTip("Back");
-    m_backButton->setEnabled(false);
-    m_toolBar->addWidget(m_backButton);
+    m_backBtn = new QPushButton(QChar(0x2190), this);
+    m_backBtn->setToolTip("Back");
+    m_backBtn->setFixedWidth(32);
+    m_backBtn->setEnabled(false);
+    connect(m_backBtn, &QPushButton::clicked, this, &BrowserWindow::onBack);
+    m_toolBar->addWidget(m_backBtn);
 
-    m_forwardButton = new QPushButton("\u2192", this);
-    m_forwardButton->setToolTip("Forward");
-    m_forwardButton->setEnabled(false);
-    m_toolBar->addWidget(m_forwardButton);
+    m_forwardBtn = new QPushButton(QChar(0x2192), this);
+    m_forwardBtn->setToolTip("Forward");
+    m_forwardBtn->setFixedWidth(32);
+    m_forwardBtn->setEnabled(false);
+    connect(m_forwardBtn, &QPushButton::clicked, this, &BrowserWindow::onForward);
+    m_toolBar->addWidget(m_forwardBtn);
 
-    m_reloadButton = new QPushButton("\u21BB", this);
-    m_reloadButton->setToolTip("Reload");
-    m_toolBar->addWidget(m_reloadButton);
+    m_reloadBtn = new QPushButton(QChar(0x21BB), this);
+    m_reloadBtn->setToolTip("Reload");
+    m_reloadBtn->setFixedWidth(32);
+    connect(m_reloadBtn, &QPushButton::clicked, this, &BrowserWindow::onReload);
+    m_toolBar->addWidget(m_reloadBtn);
 
     m_toolBar->addSeparator();
 
     // Address bar
     m_addressBar = new QLineEdit(this);
-    m_addressBar->setPlaceholderText("Enter a URL or search...");
+    m_addressBar->setPlaceholderText("Enter URL or search...");
     m_addressBar->setClearButtonEnabled(true);
     m_addressBar->setMinimumWidth(400);
+    m_addressBar->setMaximumWidth(800);
+    m_addressBar->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    connect(m_addressBar, &QLineEdit::returnPressed,
+            this, &BrowserWindow::onAddressBarReturnPressed);
     m_toolBar->addWidget(m_addressBar);
 
     // New tab button
-    m_newTabButton = new QPushButton("+", this);
-    m_newTabButton->setToolTip("New Tab");
-    m_newTabButton->setFixedWidth(30);
-    m_toolBar->addWidget(m_newTabButton);
-
-    // Signals
-    connect(m_addressBar, &QLineEdit::returnPressed,
-            this, &BrowserWindow::onAddressBarReturnPressed);
-    connect(m_newTabButton, &QPushButton::clicked,
-            this, &BrowserWindow::onNewTabClicked);
-    connect(m_reloadButton, &QPushButton::clicked, this, [this]() {
-        WebView *wv = currentWebView();
-        if (wv) wv->reload();
-    });
+    m_newTabBtn = new QPushButton("+", this);
+    m_newTabBtn->setToolTip("New Tab");
+    m_newTabBtn->setFixedWidth(30);
+    connect(m_newTabBtn, &QPushButton::clicked, this, &BrowserWindow::onNewTab);
+    m_toolBar->addWidget(m_newTabBtn);
 }
+
+// ── Status bar ──────────────────────────────────────────────────────────
 
 void BrowserWindow::setupStatusBar()
 {
     m_statusLabel = new QLabel("Ready", this);
-    statusBar()->addWidget(m_statusLabel);
+    statusBar()->addWidget(m_statusLabel, 1);
+
+    m_privacyIndicator = new QLabel("\u2705 Privacy Active", this);
+    m_privacyIndicator->setStyleSheet("color: #a6e3a1; padding: 0 8px;");
+    statusBar()->addPermanentWidget(m_privacyIndicator);
 
     m_progressBar = new QProgressBar(this);
-    m_progressBar->setMaximumWidth(150);
+    m_progressBar->setMaximumWidth(120);
     m_progressBar->setMaximum(100);
     m_progressBar->setValue(0);
     m_progressBar->setVisible(false);
+    m_progressBar->setTextVisible(false);
     statusBar()->addPermanentWidget(m_progressBar);
 }
 
+// ── Tab management ──────────────────────────────────────────────────────
+
 void BrowserWindow::addTab(const QUrl &url)
 {
-    WebView *wv = new WebView(this);
-    int index = m_tabWidget->addTab(wv, "New Tab");
+    auto *wv = new WebView(this);
+    int idx = m_tabWidget->addTab(wv, "New Tab");
 
-    connect(wv, &WebView::urlChanged,
-            this, &BrowserWindow::onUrlChanged);
-    connect(wv, &WebView::titleChanged,
-            this, &BrowserWindow::onTitleChanged);
-    connect(wv, &WebView::loadStarted,
-            this, &BrowserWindow::onLoadStarted);
-    connect(wv, &WebView::loadFinished,
-            this, &BrowserWindow::onLoadFinished);
-    connect(wv, &WebView::loadProgress,
-            this, &BrowserWindow::onLoadProgress);
-    connect(wv, &WebView::statusBarMessage,
-            m_statusLabel, &QLabel::setText);
+    connect(wv, &WebView::urlChanged, this, &BrowserWindow::onUrlChanged);
+    connect(wv, &WebView::titleChanged, this, &BrowserWindow::onTitleChanged);
+    connect(wv, &WebView::loadStarted, this, &BrowserWindow::onLoadStarted);
+    connect(wv, &WebView::loadFinished, this, &BrowserWindow::onLoadFinished);
+    connect(wv, qOverload<int>(&WebView::loadProgress), this, [this](int progress) {
+        onLoadProgress(progress);
+    });
+    connect(wv, &WebView::statusBarMessage, m_statusLabel, &QLabel::setText);
 
-    m_tabWidget->setCurrentIndex(index);
+    m_tabWidget->setCurrentIndex(idx);
 
     if (url.isValid()) {
         wv->loadUrl(url);
@@ -202,41 +212,49 @@ void BrowserWindow::addTab(const QUrl &url)
 void BrowserWindow::removeTab(int index)
 {
     if (m_tabWidget->count() <= 1) {
-        // Don't close the last tab, just load blank
-        WebView *wv = qobject_cast<WebView *>(m_tabWidget->widget(index));
-        if (wv) {
-            wv->loadUrl(QUrl("about:blank"));
-        }
+        // Keep at least one tab (load blank)
+        auto *wv = qobject_cast<WebView *>(m_tabWidget->widget(index));
+        if (wv) wv->loadUrl(QUrl("about:blank"));
         return;
     }
 
-    QWidget *widget = m_tabWidget->widget(index);
+    QWidget *w = m_tabWidget->widget(index);
     m_tabWidget->removeTab(index);
-    widget->deleteLater();
+    w->deleteLater();
 }
 
-void BrowserWindow::onNewTabClicked()
+WebView *BrowserWindow::currentWebView() const
+{
+    return qobject_cast<WebView *>(m_tabWidget->currentWidget());
+}
+
+// ── Navigation slots ────────────────────────────────────────────────────
+
+void BrowserWindow::onNewTab()
 {
     addTab(QUrl("about:blank"));
 }
 
-void BrowserWindow::onCloseTabClicked(int index)
+void BrowserWindow::onCloseTab(int index)
 {
     removeTab(index);
 }
 
-void BrowserWindow::onTabChanged(int index)
+void BrowserWindow::onTabChanged(int /*index*/)
 {
-    WebView *wv = currentWebView();
+    auto *wv = currentWebView();
     if (wv) {
         updateAddressBar(wv->currentUrl());
-        setWindowTitle(wv->title() + " - Frint Browser");
+        QString title = wv->title();
+        setWindowTitle((title.isEmpty() ? "Frint Browser"
+                                        : title + " - Frint Browser"));
+        updateNavButtons();
     }
 }
 
 void BrowserWindow::onUrlChanged(const QUrl &url)
 {
-    WebView *wv = qobject_cast<WebView *>(sender());
+    auto *wv = qobject_cast<WebView *>(sender());
     if (wv && wv == currentWebView()) {
         updateAddressBar(url);
     }
@@ -244,18 +262,20 @@ void BrowserWindow::onUrlChanged(const QUrl &url)
 
 void BrowserWindow::onTitleChanged(const QString &title)
 {
-    WebView *wv = qobject_cast<WebView *>(sender());
-    if (wv) {
-        int index = m_tabWidget->indexOf(wv);
-        if (index >= 0) {
-            QString tabTitle = title.left(30);
-            if (tabTitle.isEmpty()) tabTitle = "New Tab";
-            m_tabWidget->setTabText(index, tabTitle);
-            m_tabWidget->setTabToolTip(index, title);
-        }
-        if (wv == currentWebView()) {
-            setWindowTitle(title + " - Frint Browser");
-        }
+    auto *wv = qobject_cast<WebView *>(sender());
+    if (!wv) return;
+
+    int idx = m_tabWidget->indexOf(wv);
+    if (idx >= 0) {
+        QString tabTitle = title.left(24);
+        if (tabTitle.isEmpty()) tabTitle = "New Tab";
+        m_tabWidget->setTabText(idx, tabTitle);
+        m_tabWidget->setTabToolTip(idx, title);
+    }
+
+    if (wv == currentWebView()) {
+        setWindowTitle((title.isEmpty() ? "Frint Browser"
+                                        : title + " - Frint Browser"));
     }
 }
 
@@ -263,26 +283,18 @@ void BrowserWindow::onLoadStarted()
 {
     m_progressBar->setVisible(true);
     m_progressBar->setValue(0);
-    m_statusLabel->setText("Loading...");
 }
 
 void BrowserWindow::onLoadFinished(bool ok)
 {
     m_progressBar->setVisible(false);
     m_statusLabel->setText(ok ? "Done" : "Error loading page");
+    updateNavButtons();
 }
 
 void BrowserWindow::onLoadProgress(int progress)
 {
     m_progressBar->setValue(progress);
-}
-
-void BrowserWindow::onNavigation(const QUrl &url)
-{
-    WebView *wv = currentWebView();
-    if (wv) {
-        wv->loadUrl(url);
-    }
 }
 
 void BrowserWindow::onAddressBarReturnPressed()
@@ -292,25 +304,126 @@ void BrowserWindow::onAddressBarReturnPressed()
 
     QUrl url(text);
     if (!url.isValid()) {
-        // Try as search query via DuckDuckGo
-        url = QUrl("https://duckduckgo.com/?q=" + QUrl::toPercentEncoding(text));
+        // Search
+        QString searchUrl = SettingsManager::instance().searchEngine();
+        url = QUrl(searchUrl + QUrl::toPercentEncoding(text));
     } else if (url.scheme().isEmpty()) {
-        // Default to https
+        // Default to HTTPS
         url = QUrl("https://" + text);
     }
 
-    onNavigation(url);
+    auto *wv = currentWebView();
+    if (wv) wv->loadUrl(url);
 }
 
-WebView *BrowserWindow::currentWebView() const
+void BrowserWindow::onBack()
 {
-    return qobject_cast<WebView *>(m_tabWidget->currentWidget());
+    auto *wv = currentWebView();
+    if (wv) wv->goBack();
 }
+
+void BrowserWindow::onForward()
+{
+    auto *wv = currentWebView();
+    if (wv) wv->goForward();
+}
+
+void BrowserWindow::onReload()
+{
+    auto *wv = currentWebView();
+    if (wv) wv->reload();
+}
+
+// ── Privacy actions ─────────────────────────────────────────────────────
+
+void BrowserWindow::onToggleTrackingBlocker()
+{
+    auto &tb = TrackingBlocker::instance();
+    tb.setEnabled(!tb.isEnabled());
+    SettingsManager::instance().setTrackingBlockerEnabled(tb.isEnabled());
+    updatePrivacyIndicators();
+}
+
+void BrowserWindow::onToggleHttpsOnly()
+{
+    auto &s = SettingsManager::instance();
+    s.setHttpsOnly(!s.isHttpsOnly());
+    updatePrivacyIndicators();
+}
+
+void BrowserWindow::onToggleGpc()
+{
+    auto &gpc = GpcHeader::instance();
+    gpc.setEnabled(!gpc.isEnabled());
+    SettingsManager::instance().setGpcEnabled(gpc.isEnabled());
+    updatePrivacyIndicators();
+}
+
+void BrowserWindow::onToggleFingerprinting()
+{
+    auto &fp = FingerprintingDefender::instance();
+    fp.setEnabled(!fp.isEnabled());
+    SettingsManager::instance().setFingerprintingProtection(fp.isEnabled());
+    updatePrivacyIndicators();
+}
+
+void BrowserWindow::onClearStorage()
+{
+    StoragePartition::instance().clearAll();
+    statusBar()->showMessage("All storage partitions cleared", 5000);
+}
+
+void BrowserWindow::onClearSiteData()
+{
+    auto *wv = currentWebView();
+    if (wv) {
+        StoragePartition::instance().clearForOrigin(wv->currentUrl());
+        statusBar()->showMessage("Storage cleared for "
+                                 + wv->currentUrl().host(), 5000);
+    }
+}
+
+// ── UI helpers ─────────────────────────────────────────────────────────
 
 void BrowserWindow::updateAddressBar(const QUrl &url)
 {
+    m_addressBar->blockSignals(true);
     m_addressBar->setText(url.toString());
     m_addressBar->setCursorPosition(0);
+    m_addressBar->blockSignals(false);
+}
+
+void BrowserWindow::updateNavButtons()
+{
+    auto *wv = currentWebView();
+    if (wv) {
+        m_backBtn->setEnabled(wv->canGoBack());
+        m_forwardBtn->setEnabled(wv->canGoForward());
+    }
+}
+
+void BrowserWindow::updatePrivacyIndicators()
+{
+    auto &s = SettingsManager::instance();
+
+    m_trackingAction->setChecked(s.isTrackingBlockerEnabled());
+    m_httpsAction->setChecked(s.isHttpsOnly());
+    m_gpcAction->setChecked(s.isGpcEnabled());
+    m_fingerprintingAction->setChecked(s.isFingerprintingProtectionEnabled());
+
+    bool allSecure = s.isTrackingBlockerEnabled()
+                   && s.isHttpsOnly()
+                   && s.isGpcEnabled()
+                   && s.isFingerprintingProtectionEnabled()
+                   && s.isDohEnabled();
+
+    if (allSecure) {
+        m_privacyIndicator->setText("\u2705 Privacy Active");
+        m_privacyIndicator->setStyleSheet("color: #a6e3a1; padding: 0 8px;");
+    } else {
+        m_privacyIndicator->setText("\u26A0\uFE0F Privacy Reduced");
+        m_privacyIndicator->setStyleSheet("color: #f9e2af; padding: 0 8px;");
+    }
 }
 
 } // namespace Frint
