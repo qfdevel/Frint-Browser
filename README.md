@@ -37,7 +37,14 @@ Frint is a privacy-focused web browser built on Qt6 WebEngine, with a comprehens
 
 ## Screenshots
 
-*Coming soon*
+### Google
+<img width="1920" height="1025" alt="image" src="https://github.com/user-attachments/assets/dccb1e7b-fd06-4a40-9304-a9830896fbc7" />
+
+### Selecting a theme
+<img width="1920" height="1025" alt="image" src="https://github.com/user-attachments/assets/302873b9-198c-4f76-9207-53f857d58572" />
+
+### RAM usage with 2 Gemini AI windows open
+<img width="1919" height="1025" alt="image" src="https://github.com/user-attachments/assets/7e0246c8-919c-47d4-8a78-2a45e3caedb2" />
 
 ## Installation
 
