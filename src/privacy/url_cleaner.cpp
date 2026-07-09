@@ -46,7 +46,7 @@ QStringList UrlCleaner::s_trackingParams = {
     "oly_anon_id", "oly_enc_id",
 
     // Misc tracking
-    "wickedid", "wt_mc", "wt_zmc", "wt_zs", "wt_ni",
+    "__s", "wickedid", "wt_mc", "wt_zmc", "wt_zs", "wt_ni",
     "ICID", "ref_url", "ssp_iq", "ssp_imp_id",
     "zanpid", "soc_src", "soc_trk",
     "cmpid", "aff_id", "aff_sub", "aff_sub2", "aff_sub3",

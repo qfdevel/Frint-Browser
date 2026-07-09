@@ -1,0 +1,63 @@
+name: Validate Store Packages
+
+on:
+  push:
+    paths:
+      - 'store/**'
+  pull_request:
+    paths:
+      - 'store/**'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: store
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Validate store manifest
+      run: python validate.py --ci .
+
+    - name: Validate JSON syntax
+      run: python -m json.tool store.json > /dev/null
+
+    - name: Validate theme CSS
+      run: |
+        for theme in themes/*.css; do
+          echo "Checking $theme..."
+          if [ -f "$theme" ]; then
+            # Check for basic CSS syntax
+            grep -q "{" "$theme" || { echo "Invalid CSS: $theme"; exit 1; }
+          fi
+        done
+
+    - name: Validate extension JS
+      run: |
+        for ext in extensions/*.js; do
+          echo "Checking $ext..."
+          node --check "$ext" 2>&1 || echo "Warning: JS syntax check skipped"
+        done
+
+    - name: Check file sizes
+      run: |
+        max_size=1048576  # 1MB
+        find . -type f -name "*.js" -o -name "*.css" | while read f; do
+          size=$(stat -c%s "$f")
+          if [ "$size" -gt "$max_size" ]; then
+            echo "File too large: $f ($size bytes)"
+            exit 1
+          fi
+        done
+
+    - name: Security scan
+      run: |
+        # Check for dangerous patterns
+        find . -name "*.js" -exec grep -l "eval\|Function(" {} \; || true

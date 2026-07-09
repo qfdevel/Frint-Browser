@@ -17,11 +17,10 @@ out/
 *.pdb
 *.ilk
 
-# CMake generated
+# CMake generated (build/ handles the rest)
 CMakeCache.txt
 CMakeFiles/
 cmake_install.cmake
-Makefile
 *.ninja
 .ninja_*
 CMakeScripts/
@@ -35,17 +34,19 @@ CMakeScripts/
 *.swo
 *~
 
-# Qt Creator
+# Qt Creator / KDevelop
 *.autosave
 *.kdevses
 moc_*.cpp
 qrc_*.cpp
 ui_*.h
+.kdev4/
 
 # OS files
 .DS_Store
 Thumbs.db
 .directory
+Thumbs.db
 
 # Log / runtime files
 *.log
@@ -56,3 +57,8 @@ vgcore.*
 # Python bytecode
 __pycache__/
 *.py[cod]
+
+# Temp / dev scripts (tracked files with different names are fine)
+tmp/
+temp/
+scratch/

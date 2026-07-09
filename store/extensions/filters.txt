@@ -1,0 +1,22 @@
+# uBlock Lite filter list
+# Basic ad and tracker filters
+||doubleclick.net^
+||googlesyndication.com^
+||googleadservices.com^
+||google-analytics.com^
+||googletagmanager.com^
+||facebook.com/tr^
+||amazon-adsystem.com^
+||adsrvr.org^
+||adnxs.com^
+||rubiconproject.com^
+||criteo.com^
+||casalemedia.com^
+||moatads.com^
+||outbrain.com^
+||taboola.com^
+||scorecardresearch.com^
+||quantserve.com^
+||exelator.com^
+||demdex.net^
+||adsafeprotected.com^

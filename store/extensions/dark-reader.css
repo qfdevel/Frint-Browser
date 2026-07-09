@@ -1,0 +1,7 @@
+# Dark Reader stylesheet for Frint Browser
+/* Optional companion stylesheet */
+.dark-reader-active img,
+.dark-reader-active video,
+.dark-reader-active canvas {
+    filter: invert(1) hue-rotate(180deg);
+}

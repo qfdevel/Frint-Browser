@@ -6,7 +6,7 @@ namespace Frint {
 // ── Known tracking domains (PrivacyTests.org + Disconnect list based) ──
 
 QStringList TrackingBlocker::s_knownTrackers = {
-    // ── Google ─────────────────────────────────────────────────────────
+    // ── Google / DoubleClick ───────────────────────────────────────────
     "doubleclick.net",
     "googleads.g.doubleclick.net",
     "googlesyndication.com",
@@ -36,6 +36,9 @@ QStringList TrackingBlocker::s_knownTrackers = {
     "ad.doubleclick.net",
     "cm.g.doubleclick.net",
     "securepubads.g.doubleclick.net",
+    "googleadsserving.com",
+    "adwords.google.com",
+    "adservices.google.com",
 
     // ── Facebook / Meta ────────────────────────────────────────────────
     "facebook.com/tr",
@@ -43,26 +46,35 @@ QStringList TrackingBlocker::s_knownTrackers = {
     "pixel.facebook.com",
     "an.facebook.com",
     "static.xx.fbcdn.net",
-    "pixel.quantserve.com",
     "atlassbx.com",
     "facebook.net",
+    "meta.com",
+    "meta.net",
+    "fbcdn.com",
+    "fbcdn.net",
 
     // ── Twitter / X ────────────────────────────────────────────────────
     "analytics.twitter.com",
     "ads-twitter.com",
     "t.co",
+    "twttr.com",
+    "x.com/analytics",
 
     // ── Amazon ─────────────────────────────────────────────────────────
     "amazon-adsystem.com",
     "aax.amazon-adsystem.com",
     "amazonadsi.com",
     "rcm-na.amazon-adsystem.com",
+    "advertising.amazon.com",
+    "amazon.com/b/"
 
     // ── Microsoft / Bing ───────────────────────────────────────────────
     "bat.bing.com",
     "c.bing.com",
     "adserver.microsoft.com",
     "ads.bing.com",
+    "msads.net",
+    "microsoft.com/ad",
 
     // ── Adobe ──────────────────────────────────────────────────────────
     "adobe.com",
@@ -106,31 +118,61 @@ QStringList TrackingBlocker::s_knownTrackers = {
     "analytics.tiktok.com",
     "ads.tiktok.com",
     "pangle.io",
+    "tiktok.com/analytics",
 
     // ── Pinterest ──────────────────────────────────────────────────────
     "analytics.pinterest.com",
     "ct.pinterest.com",
     "ads.pinterest.com",
+    "pinterest.com/analytics",
 
     // ── Reddit ─────────────────────────────────────────────────────────
     "events.reddit.com",
     "ads.reddit.com",
+    "reddit.com/analytics",
 
     // ── Snapchat ───────────────────────────────────────────────────────
     "analytics.snapchat.com",
     "ads.snapchat.com",
+
+    // ── YouTube ────────────────────────────────────────────────────────
+    "youtube.com/ad",
+    "youtube.com/analytics",
+    "youtube.googleapis.com",
+    "ytimg.com",
+    "googlevideo.com",
 
     // ── Yahoo / Verizon ───────────────────────────────────────────────
     "yahoo.com",
     "adserver.yahoo.com",
     "analytics.yahoo.com",
     "yimg.com",
+    "adtech.yahoo.com",
+    "advertising.yahoo.com",
+    "gemini.yahoo.com",
 
     // ── Yandex ─────────────────────────────────────────────────────────
     "yandex.com",
     "yandex.ru",
     "mc.yandex.ru",
     "mc.yandex.com",
+    "ads.yandex.com",
+    "yandexadexchange.net",
+
+    // ── Unity ──────────────────────────────────────────────────────────
+    "unity.com",
+    "unity3d.com",
+    "unityads.unity3d.com",
+    "adserver.unityads.unity3d.com",
+
+    // ── Media.net ──────────────────────────────────────────────────────
+    "media.net",
+    "media.adfrontiers.com",
+
+    // ── AdColony ───────────────────────────────────────────────────────
+    "adcolony.com",
+    "adc3-launch.adcolony.com",
+    "ads30.adcolony.com",
 
     // ── General ad / analytics networks ───────────────────────────────
     "adsrvr.org",
@@ -149,6 +191,10 @@ QStringList TrackingBlocker::s_knownTrackers = {
     "scorecardresearch.com",
     "comscore.com",
     "comscoreresearch.com",
+    "advertising.com",
+    "adtech.de",
+    "adserverpub.com",
+    "tribalfusion.com",
 
     // ── Analytics platforms ────────────────────────────────────────────
     "hotjar.com",
@@ -168,6 +214,35 @@ QStringList TrackingBlocker::s_knownTrackers = {
     "chartbeat.com",
     "chartbeat.net",
     "ping.chartbeat.net",
+    "luckyorange.com",
+    "luckyorangedata.com",
+    "freshworks.com",
+    "freshmarketer.com",
+    "stats.wp.com",
+    "pixel.wp.com",
+    "wordpress.com/stats",
+    "clickfunnels.com",
+    "convertkit.com",
+    "kissmetrics.com",
+    "woopra.com",
+    "livesession.io",
+    "smartlook.com",
+    "sessioncam.com",
+    "inspectlet.com",
+    "clarity.ms",
+    "clarity.microsoft.com",
+
+    // ── Error Trackers ────────────────────────────────────────────────
+    "bugsnag.com",
+    "sentry.io",
+    "rollbar.com",
+    "datadoghq.com",
+    "logrocket.com",
+    "trackjs.com",
+    "airbrake.io",
+    "exceptionless.com",
+    "raygun.com",
+    "appdynamics.com",
 
     // ── Ad serving ─────────────────────────────────────────────────────
     "adzerk.net",
@@ -175,9 +250,29 @@ QStringList TrackingBlocker::s_knownTrackers = {
     "sovrn.com",
     "sharethrough.com",
     "revcontent.com",
+    "adpushup.com",
+    "adthrive.com",
+    "mediavine.com",
+    "shemedia.com",
 
     // ── Cloudflare analytics ──────────────────────────────────────────
     "cloudflareinsights.com",
+
+    // ── OEM / Manufacturer Trackers ───────────────────────────────────
+    "realme.com",
+    "oppo.com",
+    "oneplus.com",
+    "apple.com/analytics",
+    "app-analytics-services.com",
+    "metrics.apple.com",
+    "xiaomi.com",
+    "mi.com/analytics",
+    "xiaomi.net",
+    "huawei.com",
+    "huawei.net",
+    "samsung.com/analytics",
+    "samsungads.com",
+    "samsungacr.com",
 
     // ── Other trackers ─────────────────────────────────────────────────
     "quantserve.com",
@@ -190,6 +285,13 @@ QStringList TrackingBlocker::s_knownTrackers = {
     "shareasale.com",
     "cj.com",
     "awin.com",
+    "popads.net",
+    "propellerads.com",
+    "exoclick.com",
+    "trafficfactory.biz",
+    "adf.ly",
+    "shorte.st",
+    "sh.st",
 };
 
 TrackingBlocker &TrackingBlocker::instance()

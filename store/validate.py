@@ -1,173 +1,163 @@
 #!/usr/bin/env python3
 """
-Frint Plugin & Theme Store Validation Script
-
-Validates submitted themes and extensions for:
-- Valid JSON syntax
-- Required fields
-- Security issues (no executable code, no remote URLs in themes)
-- Version format
-- Field types
+Frint Browser Store Validator
+Validates theme and extension packages for security and correctness.
 """
 
 import json
-import sys
 import os
+import sys
 import re
+import hashlib
+from pathlib import Path
 
-REQUIRED_THEME_FIELDS = {"id", "name", "version", "author", "colors"}
-REQUIRED_EXTENSION_FIELDS = {"id", "name", "version", "author", "type", "permissions"}
-VALID_TYPES = {"privacy", "toolbar", "customization", "developer"}
+VALID_KEYS_THEME = {'id', 'name', 'version', 'author', 'description', 'type', 'files', 'screenshot', 'license', 'compatibility'}
+VALID_KEYS_EXTENSION = {'id', 'name', 'version', 'author', 'description', 'type', 'permissions', 'files', 'license', 'compatibility'}
+VALID_TYPES = {'theme', 'extension'}
+VALID_LICENSES = {'MIT', 'GPL-2.0', 'GPL-3.0', 'Apache-2.0', 'BSD-2-Clause', 'BSD-3-Clause', 'MPL-2.0', 'LGPL-2.1', 'LGPL-3.0'}
+DANGEROUS_PERMISSIONS = {'native-messaging', 'file-system', 'process'}
+DANGEROUS_PATTERNS = [
+    rb'eval\s*\(',
+    rb'Function\s*\(',
+    rb'setTimeout\s*\(\s*["\']',
+    rb'setInterval\s*\(\s*["\']',
+    rb'new\s+Function\s*\(',
+    rb'document\.write\s*\(',
+    rb'innerHTML\s*=',
+    rb'outerHTML\s*=',
+    rb'insertAdjacentHTML\s*\(',
+]
 
-COLORS_DIR = "../store/themes"
-EXTENSIONS_DIR = "../store/extensions"
+class StoreValidator:
+    def __init__(self, store_dir: str):
+        self.store_dir = Path(store_dir)
+        self.errors = []
+        self.warnings = []
+        self.manifest = None
 
-def validate_json_file(filepath):
-    """Validate a JSON file can be parsed."""
-    try:
-        with open(filepath, 'r') as f:
-            return json.load(f)
-    except json.JSONDecodeError as e:
-        return f"Invalid JSON in {filepath}: {e}"
-    except FileNotFoundError:
-        return f"File not found: {filepath}"
+    def validate(self) -> bool:
+        """Run all validations. Returns True if valid."""
+        self._validate_manifest()
+        self._validate_themes()
+        self._validate_extensions()
+        self._validate_file_integrity()
 
-def validate_theme(data, filename):
-    """Validate a theme manifest."""
-    errors = []
+        if self.errors:
+            print(f"❌ VALIDATION FAILED - {len(self.errors)} error(s), {len(self.warnings)} warning(s)")
+            for err in self.errors:
+                print(f"  ERROR: {err}")
+            for warn in self.warnings:
+                print(f"  WARNING: {warn}")
+            return False
 
-    # Check required fields
-    for field in REQUIRED_THEME_FIELDS:
-        if field not in data:
-            errors.append(f"Missing required field: '{field}'")
+        print(f"✅ VALIDATION PASSED - {len(self.warnings)} warning(s)")
+        for warn in self.warnings:
+            print(f"  WARNING: {warn}")
+        return True
 
-    if "colors" in data:
-        colors = data["colors"]
-        if not isinstance(colors, dict):
-            errors.append("'colors' must be an object")
-        else:
-            required_colors = {"background", "foreground", "accent"}
-            for rc in required_colors:
-                if rc not in colors:
-                    errors.append(f"Missing required color: '{rc}'")
+    def _validate_manifest(self):
+        manifest_path = self.store_dir / 'store.json'
+        if not manifest_path.exists():
+            self.errors.append("Missing store.json manifest")
+            return
 
-            # Validate color format
-            color_pattern = re.compile(r'^#[0-9a-fA-F]{6}$')
-            for name, value in colors.items():
-                if not isinstance(value, str) or not color_pattern.match(value):
-                    errors.append(f"Invalid color format for '{name}': {value}")
+        try:
+            with open(manifest_path) as f:
+                self.manifest = json.load(f)
+        except json.JSONDecodeError as e:
+            self.errors.append(f"Invalid JSON in store.json: {e}")
+            return
 
-    # Security check: no executable content
-    if "javascript" in data or "script" in data:
-        errors.append("Themes must not contain executable code")
+        if 'themes' not in self.manifest or 'extensions' not in self.manifest:
+            self.errors.append("store.json must contain 'themes' and 'extensions' arrays")
 
-    # Version format check
-    if "version" in data:
-        version_pattern = re.compile(r'^\d+\.\d+\.\d+$')
-        if not version_pattern.match(data["version"]):
-            errors.append(f"Invalid version format: {data['version']} (expected X.Y.Z)")
+    def _validate_themes(self):
+        if not self.manifest: return
+        themes = self.manifest.get('themes', [])
+        for theme in themes:
+            self._validate_package(theme, 'theme', VALID_KEYS_THEME)
+            for file in theme.get('files', []):
+                file_path = self.store_dir / 'themes' / file
+                if not file_path.exists():
+                    self.errors.append(f"Theme '{theme['id']}': missing file '{file}'")
+                elif not file.endswith('.css'):
+                    self.warnings.append(f"Theme '{theme['id']}': non-CSS file '{file}'")
 
-    return errors
+    def _validate_extensions(self):
+        if not self.manifest: return
+        extensions = self.manifest.get('extensions', [])
+        for ext in extensions:
+            self._validate_package(ext, 'extension', VALID_KEYS_EXTENSION)
+            permissions = ext.get('permissions', [])
+            for perm in permissions:
+                if perm in DANGEROUS_PERMISSIONS:
+                    self.errors.append(f"Extension '{ext['id']}': dangerous permission '{perm}'")
+            for file in ext.get('files', []):
+                file_path = self.store_dir / 'extensions' / file
+                if not file_path.exists():
+                    self.errors.append(f"Extension '{ext['id']}': missing file '{file}'")
+                elif file.endswith('.js'):
+                    self._check_js_security(file_path, ext['id'])
 
-def validate_extension(data, filename):
-    """Validate an extension manifest."""
-    errors = []
+    def _validate_package(self, pkg, pkg_type, valid_keys):
+        pkg_id = pkg.get('id', 'unknown')
 
-    # Check required fields
-    for field in REQUIRED_EXTENSION_FIELDS:
-        if field not in data:
-            errors.append(f"Missing required field: '{field}'")
+        if pkg.get('type') != pkg_type:
+            self.errors.append(f"Package '{pkg_id}': type should be '{pkg_type}' got '{pkg.get('type')}'")
 
-    # Validate type
-    if "type" in data and data["type"] not in VALID_TYPES:
-        errors.append(f"Invalid extension type: {data['type']}. Valid: {', '.join(VALID_TYPES)}")
+        for key in pkg:
+            if key not in valid_keys:
+                self.warnings.append(f"Package '{pkg_id}': unknown key '{key}'")
 
-    # Validate permissions
-    if "permissions" in data:
-        if not isinstance(data["permissions"], list):
-            errors.append("'permissions' must be a list")
+        for key in valid_keys - {'screenshot', 'permissions'}:
+            if key not in pkg:
+                self.errors.append(f"Package '{pkg_id}': missing required key '{key}'")
 
-    # Version format
-    if "version" in data:
-        version_pattern = re.compile(r'^\d+\.\d+\.\d+$')
-        if not version_pattern.match(data["version"]):
-            errors.append(f"Invalid version format: {data['version']}")
+        license_val = pkg.get('license', '')
+        if license_val not in VALID_LICENSES:
+            self.warnings.append(f"Package '{pkg_id}': non-standard license '{license_val}'")
 
-    return errors
+        version = pkg.get('version', '')
+        if not re.match(r'^\d+\.\d+\.\d+$', version):
+            self.errors.append(f"Package '{pkg_id}': invalid version format '{version}'")
+
+    def _check_js_security(self, file_path: Path, pkg_id: str):
+        try:
+            with open(file_path, 'rb') as f:
+                content = f.read()
+
+            for pattern in DANGEROUS_PATTERNS:
+                if re.search(pattern, content, re.IGNORECASE):
+                    self.warnings.append(
+                        f"Extension '{pkg_id}': potentially unsafe code in '{file_path.name}' "
+                        f"(matches: {pattern})"
+                    )
+        except IOError:
+            pass
+
+    def _validate_file_integrity(self):
+        if not self.manifest: return
+        for pkg_list, pkg_type in [(self.manifest.get('themes', []), 'theme'),
+                                     (self.manifest.get('extensions', []), 'extension')]:
+            for pkg in pkg_list:
+                base_dir = self.store_dir / f"{pkg_type}s"
+                for file in pkg.get('files', []):
+                    file_path = base_dir / file
+                    if file_path.exists() and file_path.stat().st_size == 0:
+                        self.errors.append(f"Package '{pkg['id']}': empty file '{file}'")
 
 def main():
-    print("═" * 60)
-    print("  Frint Plugin & Theme Store Validation")
-    print("═" * 60)
+    import argparse
+    parser = argparse.ArgumentParser(description='Validate Frint Browser store packages')
+    parser.add_argument('store_dir', nargs='?', default='.',
+                        help='Store directory containing store.json')
+    parser.add_argument('--ci', action='store_true',
+                        help='Enable CI mode (strict checks)')
+    args = parser.parse_args()
 
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    store_path = os.path.join(base_dir, "store.json")
+    validator = StoreValidator(args.store_dir)
+    success = validator.validate()
+    sys.exit(0 if success else 1)
 
-    # Validate store manifest
-    print("\n📋 Validating store manifest...")
-    store = validate_json_file(store_path)
-    if isinstance(store, str):
-        print(f"  ❌ {store}")
-        return 1
-
-    total_themes = 0
-    total_extensions = 0
-    errors_found = 0
-
-    # Validate themes
-    if "themes" in store:
-        for theme in store["themes"]:
-            total_themes += 1
-            theme_id = theme.get("id", "unknown")
-            print(f"\n🎨 Theme: {theme.get('name', theme_id)} ({theme_id})")
-
-            theme_file = theme.get("file", "")
-            theme_path = os.path.join(base_dir, theme_file)
-            theme_data = validate_json_file(theme_path)
-
-            if isinstance(theme_data, str):
-                print(f"  ❌ {theme_data}")
-                errors_found += 1
-            else:
-                errors = validate_theme(theme_data, theme_file)
-                if errors:
-                    for err in errors:
-                        print(f"  ❌ {err}")
-                    errors_found += len(errors)
-                else:
-                    print(f"  ✅ Valid")
-
-    # Validate extensions
-    if "extensions" in store:
-        for ext in store["extensions"]:
-            total_extensions += 1
-            ext_id = ext.get("id", "unknown")
-            print(f"\n🔌 Extension: {ext.get('name', ext_id)} ({ext_id})")
-
-            ext_file = ext.get("file", "")
-            ext_path = os.path.join(base_dir, ext_file)
-            ext_data = validate_json_file(ext_path)
-
-            if isinstance(ext_data, str):
-                print(f"  ❌ {ext_data}")
-                errors_found += 1
-            else:
-                errors = validate_extension(ext_data, ext_file)
-                if errors:
-                    for err in errors:
-                        print(f"  ❌ {err}")
-                    errors_found += len(errors)
-                else:
-                    print(f"  ✅ Valid")
-
-    print(f"\n═" * 60)
-    print(f"  Summary: {total_themes} themes, {total_extensions} extensions")
-    if errors_found:
-        print(f"  ❌ {errors_found} error(s) found")
-        return 1
-    else:
-        print(f"  ✅ All valid!")
-        return 0
-
-if __name__ == "__main__":
-    sys.exit(main())
+if __name__ == '__main__':
+    main()

@@ -1,0 +1,45 @@
+<RCC>
+    <qresource prefix="/frint">
+        <file alias="store/themes/catppuccin-mocha.css">store/themes/catppuccin-mocha.css</file>
+        <file alias="store/themes/nord-dark.css">store/themes/nord-dark.css</file>
+        <file alias="store/themes/gruvbox-material.css">store/themes/gruvbox-material.css</file>
+        <file alias="store/themes/dracula.css">store/themes/dracula.css</file>
+        <file alias="store/themes/tokyo-night.css">store/themes/tokyo-night.css</file>
+        <file alias="store/themes/everforest.css">store/themes/everforest.css</file>
+        <file alias="store/store.json">store/store.json</file>
+        <file alias="extensions/dark-reader.js">store/extensions/dark-reader.js</file>
+        <file alias="extensions/dark-reader.css">store/extensions/dark-reader.css</file>
+        <file alias="extensions/ublock-lite.js">store/extensions/ublock-lite.js</file>
+        <file alias="extensions/filters.txt">store/extensions/filters.txt</file>
+        <file alias="extensions/privacy-badger.js">store/extensions/privacy-badger.js</file>
+        <file alias="privacy/tracking_domains.txt">resources/privacy/tracking_domains.txt</file>
+        <file alias="privacy/tracking_params.txt">resources/privacy/tracking_params.txt</file>
+        <file alias="privacy/anti_fingerprint.js">resources/privacy/anti_fingerprint.js</file>
+        <file alias="privacy/cosmetic_blocker.js">resources/privacy/cosmetic_blocker.js</file>
+        <file alias="configs/default_prefs.json">configs/default_prefs.json</file>
+        <file alias="icons/icon_16.png">resources/icons/icon_16.png</file>
+        <file alias="icons/icon_32.png">resources/icons/icon_32.png</file>
+        <file alias="icons/icon_48.png">resources/icons/icon_48.png</file>
+        <file alias="icons/icon_64.png">resources/icons/icon_64.png</file>
+        <file alias="icons/icon_128.png">resources/icons/icon_128.png</file>
+        <file alias="icons/icon_256.png">resources/icons/icon_256.png</file>
+        <file alias="fonts/Inter-Regular.ttf">resources/fonts/Inter-Regular.ttf</file>
+        <file alias="fonts/Inter-Bold.ttf">resources/fonts/Inter-Bold.ttf</file>
+        <file alias="fonts/JetBrainsMono-Regular.ttf">resources/fonts/JetBrainsMono-Regular.ttf</file>
+        <file alias="fonts/JetBrainsMono-Bold.ttf">resources/fonts/JetBrainsMono-Bold.ttf</file>
+        <file alias="samples/sample1.html">resources/samples/sample1.html</file>
+        <file alias="samples/sample2.html">resources/samples/sample2.html</file>
+        <file alias="samples/sample3.html">resources/samples/sample3.html</file>
+        <file alias="samples/sample4.html">resources/samples/sample4.html</file>
+        <file alias="samples/sample5.html">resources/samples/sample5.html</file>
+        <file alias="samples/sample6.html">resources/samples/sample6.html</file>
+        <file alias="samples/sample7.html">resources/samples/sample7.html</file>
+        <file alias="samples/sample8.html">resources/samples/sample8.html</file>
+        <file alias="samples/sample9.html">resources/samples/sample9.html</file>
+        <file alias="samples/sample10.html">resources/samples/sample10.html</file>
+        <file alias="docs/README.md">README.md</file>
+        <file alias="docs/CHANGELOG.md">CHANGELOG.md</file>
+        <file alias="docs/CONTRIBUTING.md">CONTRIBUTING.md</file>
+        <file alias="docs/LICENSE">LICENSE</file>
+    </qresource>
+</RCC>

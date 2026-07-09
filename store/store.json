@@ -1,93 +1,82 @@
 {
-    "name": "Frint Plugin & Theme Store",
-    "version": "1.0.0",
-    "description": "Community-driven themes and privacy extensions for Frint Browser",
-    "website": "https://frintbrowser.dev/store",
-    "repository": "https://github.com/frint-browser/Frint-Plugin-Theme-Store",
-    "themes": [
-        {
-            "id": "frint-dark",
-            "name": "Frint Dark (Default)",
-            "version": "1.0.0",
-            "author": "Frint Team",
-            "description": "Default dark theme with Catppuccin Mocha-inspired colors",
-            "compatibility": ">=0.1.0",
-            "colors": {
-                "background": "#1e1e2e",
-                "foreground": "#cdd6f4",
-                "accent": "#cba6f7",
-                "success": "#a6e3a1",
-                "warning": "#f9e2af",
-                "error": "#f38ba8",
-                "surface0": "#313244",
-                "surface1": "#45475a",
-                "surface2": "#585b70"
-            },
-            "file": "themes/frint-dark.json"
-        },
-        {
-            "id": "frint-light",
-            "name": "Frint Light",
-            "version": "1.0.0",
-            "author": "Frint Team",
-            "description": "Clean light theme for daytime browsing",
-            "compatibility": ">=0.1.0",
-            "colors": {
-                "background": "#eff1f5",
-                "foreground": "#4c4f69",
-                "accent": "#7287fd",
-                "success": "#40a02b",
-                "warning": "#df8e1d",
-                "error": "#d20f39",
-                "surface0": "#ccd0da",
-                "surface1": "#bcc0cc",
-                "surface2": "#acb0be"
-            },
-            "file": "themes/frint-light.json"
-        },
-        {
-            "id": "nord",
-            "name": "Nord",
-            "version": "1.0.0",
-            "author": "Nord Community",
-            "description": "Arctic, north-bluish clean theme",
-            "compatibility": ">=0.1.0",
-            "file": "themes/nord.json"
-        }
-    ],
-    "extensions": [
-        {
-            "id": "ublock-origin-compat",
-            "name": "uBlock Origin Compatibility",
-            "version": "1.0.0",
-            "author": "Frint Team",
-            "description": "Enhanced tracker blocking using uBlock Origin's filter lists",
-            "type": "privacy",
-            "compatibility": ">=0.1.0",
-            "permissions": ["webRequest", "webRequestBlocking", "storage"],
-            "file": "extensions/ublock-origin-compat.json"
-        },
-        {
-            "id": "noscript-compat",
-            "name": "NoScript Compatibility",
-            "version": "1.0.0",
-            "author": "Frint Team",
-            "description": "Per-domain script blocking controls",
-            "type": "privacy",
-            "compatibility": ">=0.1.0",
-            "permissions": ["webRequest", "storage"],
-            "file": "extensions/noscript-compat.json"
-        },
-        {
-            "id": "privacy-badger-compat",
-            "name": "Privacy Badger Compatibility",
-            "version": "1.0.0",
-            "author": "Frint Team",
-            "description": "Learning-based tracker blocking that adapts to your browsing",
-            "type": "privacy",
-            "compatibility": ">=0.1.0",
-            "permissions": ["webRequest", "storage", "learning"],
-            "file": "extensions/privacy-badger-compat.json"
-        }
-    ]
+  "name": "Frint Plugin/Theme Store",
+  "version": "1.0.0",
+  "description": "Official store for Frint Browser themes and extensions",
+  "store_url": "https://store.frintbrowser.dev",
+  "themes": [
+    {
+      "id": "catppuccin-mocha",
+      "name": "Catppuccin Mocha",
+      "version": "1.0.0",
+      "author": "Frint Team",
+      "description": "Catppuccin Mocha dark theme with warm, cozy tones",
+      "type": "theme",
+      "files": ["catppuccin-mocha.css"],
+      "screenshot": "screenshots/catppuccin-mocha.png",
+      "license": "MIT",
+      "compatibility": ">=0.1.0"
+    },
+    {
+      "id": "nord-dark",
+      "name": "Nord Dark",
+      "version": "1.0.0",
+      "author": "Frint Team",
+      "description": "Arctic, bluish dark theme inspired by Nord palette",
+      "type": "theme",
+      "files": ["nord-dark.css"],
+      "screenshot": "screenshots/nord-dark.png",
+      "license": "MIT",
+      "compatibility": ">=0.1.0"
+    },
+    {
+      "id": "gruvbox-material",
+      "name": "Gruvbox Material",
+      "version": "1.0.0",
+      "author": "Frint Team",
+      "description": "Warm retro theme based on the Gruvbox color palette",
+      "type": "theme",
+      "files": ["gruvbox-material.css"],
+      "screenshot": "screenshots/gruvbox-material.png",
+      "license": "MIT",
+      "compatibility": ">=0.1.0"
+    }
+  ],
+  "extensions": [
+    {
+      "id": "dark-reader",
+      "name": "Dark Reader",
+      "version": "1.0.0",
+      "author": "Frint Team",
+      "description": "Apply dark mode to all websites",
+      "type": "extension",
+      "permissions": ["storage", "content-scripts"],
+      "files": ["dark-reader.js", "dark-reader.css"],
+      "license": "MIT",
+      "compatibility": ">=0.1.0"
+    },
+    {
+      "id": "ublock-lite",
+      "name": "uBlock Lite",
+      "version": "1.0.0",
+      "author": "Frint Team",
+      "description": "Lightweight ad and tracker blocker",
+      "type": "extension",
+      "permissions": ["web-request", "storage", "content-scripts"],
+      "files": ["ublock-lite.js", "filters.txt"],
+      "license": "GPL-3.0",
+      "compatibility": ">=0.1.0"
+    },
+    {
+      "id": "privacy-badger",
+      "name": "Privacy Badger",
+      "version": "1.0.0",
+      "author": "Frint Team",
+      "description": "Learn and block invisible trackers",
+      "type": "extension",
+      "permissions": ["web-request", "storage", "cookies"],
+      "files": ["privacy-badger.js"],
+      "license": "GPL-3.0",
+      "compatibility": ">=0.1.0"
+    }
+  ]
 }

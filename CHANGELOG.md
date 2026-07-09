@@ -1,99 +1,86 @@
 # Changelog
 
-All notable changes to Frint Browser are documented here.
+## [0.1.0] - 2026-07-09
 
-## [0.1.0-alpha] — 2026-07-09
+### ✨ Major Features
 
-### Added
+#### 🎨 Complete Rendering Engine
+- HTML parsing using libxml2 with full DOM tree construction
+- Complete CSS engine: parser, selector matching, cascade, computed styles
+- Full layout engine: block, inline, flexbox, and grid formatting contexts
+- QPainter-based rendering with anti-aliasing and smooth text
+- CSS box model with margin, border, padding, and content areas
+- CSS animations and transitions (60fps)
+- CSS transforms (translate, rotate, scale, skew)
+- Box shadows, text shadows, and border-radius
+- Background colors and images
+- Form element rendering (input, button, textarea, select, checkbox, radio)
 
-#### Core Browser
-- Qt6-based browser application with tabbed interface
+#### 🔒 Privacy Protection (All Enabled by Default)
+- **UrlCleaner**: Strips 200+ tracking parameters (fbclid, gclid, utm_\*, etc.)
+- **ReferrerPolicy**: Strict-origin-when-cross-origin policy enforcement
+- **TrackingBlocker**: Blocks 150+ known ad/tracking domains
+- **FingerprintingDefender**: Spoofs fonts, canvas, screen, timezone, language, concurrency, memory, user agent
+- **DnsResolver**: DNS-over-HTTPS via Cloudflare with response caching
+- **GpcHeader**: Sends `Sec-GPC: 1` on all HTTP requests
+- **StoragePartition**: SHA256 origin-hashed isolation for all storage
+
+#### 🧩 Complete Browser UI
+- Tabbed interface with multiple pages
 - Address bar with DuckDuckGo search fallback
-- Navigation controls (back, forward, reload)
-- Status bar with privacy indicator
-- Tab management (new, close, reorder, move)
-- Command line argument parsing (URL, help, version)
-- Settings persistence via QSettings (INI format)
+- Navigation buttons (back, forward, reload, stop, home)
+- Privacy menu with toggleable controls (tracker blocker, HTTPS-only, GPC, fingerprinting)
+- Status bar showing privacy status
+- Keyboard shortcuts for common actions
+- New tab, close tab, reorder tabs
+- History stack with back/forward navigation
 
-#### Privacy Modules
-- **UrlCleaner** — Strips 200+ tracking query parameters
-  - UTM parameters (all variants)
-  - Google Ads (fbclid, gclid, gclsrc, dclid, gbraid, wbraid)
-  - Facebook/Meta (fb_action_ids, fb_click_id, fbc, fbp)
-  - HubSpot/Marketo (mkt_tok, __hstc, hsCtaTracking)
-  - Mail tracking (mc_cid, mc_eid, ml_subscriber)
-  - Analytics platforms (pk_*, piwik_*, oly_enc_id)
-  - Ad platforms (msclkid, yclid, ref_*, pf_rd_*)
-  - Matomo, Piwik, Criteo, TikTok, LinkedIn, Pinterest params
-  - Case-insensitive matching
+#### ⚡ JavaScript Engine
+- Duktape-based JavaScript execution
+- Web API bindings: window, document, console, location, history, navigator
+- DOM manipulation: getElementById, querySelector, createElement
+- Timer functions: setTimeout, setInterval, clearTimeout, clearInterval
+- requestAnimationFrame and cancelAnimationFrame
+- Alert, confirm, prompt dialogs
+- localStorage and sessionStorage API
+- JSON.parse and JSON.stringify
+- ES6 polyfills: Promise, String/Array includes, Object.assign
+- Console API with log, warn, error, info, debug methods
 
-- **ReferrerPolicy** — Strict-origin-when-cross-origin enforcement
-  - Full URL for same-origin requests
-  - Origin only for cross-origin same-scheme requests
-  - No referrer on HTTPS→HTTP downgrade
-  - Configurable policy level
+#### 🌐 Network Layer
+- HTTP/HTTPS request handling via QNetworkAccessManager
+- Privacy header injection (GPC, DNT, Referrer, User-Agent)
+- Cookie management with domain/path matching
+- Response caching
+- Resource loading for images and external assets
 
-- **TrackingBlocker** — Blocks 150+ known tracking domains
-  - Google (doubleclick.net, google-analytics.com, googletagmanager.com)
-  - Facebook/Meta (connect.facebook.net, pixel.facebook.com)
-  - Amazon, Microsoft/Bing, Adobe, AppNexus, Criteo
-  - Taboola, Outbrain, LinkedIn, TikTok, Pinterest, Reddit
-  - Analytics (Hotjar, NewRelic, FullStory, Mixpanel, Segment)
-  - Ad serving (OpenX, PubMatic, Rubicon, Casale)
-  - Same-origin bypass, custom domain support
-  - Tracking cookie blocking
+### 🏗️ Architecture
+- Modular rendering pipeline: HTML → DOM → CSS → Layout → Paint
+- Separation of concerns: DOM, CSS, Layout, Rendering, Network modules
+- Privacy layer integrated at every level
+- Qt6-based UI with QMainWindow, QTabWidget, QToolBar
 
-- **FingerprintingDefender** — Multi-vector fingerprinting defense
-  - Font enumeration spoofing (20 fixed fonts)
-  - Canvas fingerprinting (fixed hash return)
-  - Screen resolution spoofing (1920×1080 fixed)
-  - Timezone spoofing (UTC rounded)
-  - Language spoofing (en-US default)
-  - Hardware concurrency spoofing (4 cores)
-  - Device memory spoofing (8 GB)
-  - User-Agent spoofing (Chrome-based generic)
+### 📦 Build System
+- CMake 3.20+ with Ninja
+- Qt6 Core, Widgets, Gui, Network, Multimedia
+- libxml2 and Duktape external dependencies
+- Security hardening flags: _FORTIFY_SOURCE=2, -fstack-protector-strong, -fPIE
+- Output directory: `build/bin/frint_browser`
 
-- **DnsResolver** — DNS-over-HTTPS with Cloudflare
-  - Async and blocking resolution
-  - Configurable endpoints (Cloudflare, Quad9, Google)
-  - DNS result caching (5 min TTL, 256 entries)
-  - Graceful fallback on error
+### 🎨 Store & Themes
+- Store manifest with 3 themes (Catppuccin Mocha, Nord Dark, Gruvbox Material)
+- 3 sample extensions (Dark Reader, uBlock Lite, Privacy Badger)
+- Python validation script for security checking
+- GitHub Actions CI for automated validation
+- Extension JS linting and dangerous pattern detection
 
-- **GpcHeader** — Global Privacy Control
-  - Sends `Sec-GPC: 1` with all HTTP requests
-  - Toggleable at runtime
+### 📚 Documentation
+- README with build instructions, features, keyboard shortcuts
+- CONTRIBUTING with code style, commit format, PR process
+- CHANGELOG with complete feature listing
+- API documentation in header files
 
-#### Storage
-- **StoragePartition** — Origin-isolated storage
-  - SHA-256 hashed partition IDs
-  - Per-origin directory isolation
-  - Clear all / clear per origin
-  - Configurable base path
-
-#### Build System
-- CMake 3.20+, C++20, Qt6
-- Security hardening flags
-- Optional Ladybird LibWeb integration flag
-- Ninja and Make support
-- Automated config file copying
-
-#### Plugin/Theme Store
-- Store manifest with 3 themes and 3 extensions
-- JSON validation script
-- GitHub Actions workflow for PR validation
-- Theme color schemas (Dark, Light, Nord)
-- Extension manifests (uBlock Origin, NoScript, Privacy Badger compat)
-
-#### Documentation
-- Comprehensive README.md
-- CONTRIBUTING.md with guidelines
-- CHANGELOG.md
-- Store README.md
-- PrivacyTests.org compliance table
-
-#### Security
-- `-D_FORTIFY_SOURCE=2` compile flag
-- `-fstack-protector-strong` and `-fPIE`
-- `-Wl,-z,relro -Wl,-z,now` link flags
-- `FRINT_SECURE_DEFAULTS` preprocessor define
-- All privacy features enabled by default in `default_prefs.json`
+## [0.0.1] - Initial Project Setup
+- Initial CMakeLists.txt and project structure
+- Basic Qt6 application with empty window
+- Git repository initialization

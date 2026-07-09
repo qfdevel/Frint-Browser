@@ -1,0 +1,150 @@
+/* Nord Dark - Glassmorphism Edition ✨ */
+QMainWindow, QWidget#centralwidget {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 #2e3440, stop:0.5 #3b4252, stop:1 #242933);
+}
+QToolBar {
+    background: rgba(59, 66, 82, 0.75);
+    border-bottom: 1px solid rgba(76, 86, 106, 0.3);
+    border-radius: 0;
+    padding: 4px 10px;
+    spacing: 8px;
+}
+QToolButton {
+    background: rgba(67, 76, 94, 0.25);
+    color: #eceff4;
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 10px;
+    padding: 4px 10px;
+    font-size: 14px;
+}
+QToolButton:hover {
+    background: rgba(76, 86, 106, 0.5);
+    border-color: rgba(136, 192, 208, 0.25);
+}
+QToolButton:pressed {
+    background: rgba(76, 86, 106, 0.7);
+}
+QLineEdit {
+    background: rgba(67, 76, 94, 0.45);
+    color: #eceff4;
+    border: 2px solid rgba(76, 86, 106, 0.4);
+    border-radius: 14px;
+    padding: 8px 18px;
+    font-size: 13px;
+    selection-background-color: rgba(136, 192, 208, 0.35);
+}
+QLineEdit:focus {
+    border-color: rgba(136, 192, 208, 0.6);
+    background: rgba(67, 76, 94, 0.65);
+}
+QLineEdit:hover:!focus {
+    border-color: rgba(136, 192, 208, 0.2);
+    background: rgba(67, 76, 94, 0.55);
+}
+QTabWidget::pane {
+    background: rgba(46, 52, 64, 0.4);
+    border: none;
+    border-top: 1px solid rgba(76, 86, 106, 0.15);
+}
+QTabBar::tab {
+    background: rgba(59, 66, 82, 0.45);
+    color: #616e88;
+    border: 1px solid transparent;
+    border-bottom: none;
+    padding: 8px 20px;
+    margin: 4px 2px 0 2px;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    font-size: 12px;
+    min-width: 80px;
+}
+QTabBar::tab:selected {
+    background: rgba(46, 52, 64, 0.8);
+    color: #eceff4;
+    border-color: rgba(76, 86, 106, 0.3);
+    border-bottom: 2px solid rgba(136, 192, 208, 0.7);
+}
+QTabBar::tab:hover:!selected {
+    background: rgba(76, 86, 106, 0.5);
+    color: #d8dee9;
+}
+QStatusBar {
+    background: rgba(59, 66, 82, 0.75);
+    color: #d8dee9;
+    border-top: 1px solid rgba(76, 86, 106, 0.3);
+    font-size: 11px;
+    padding: 2px 10px;
+}
+QMenuBar {
+    background: rgba(59, 66, 82, 0.55);
+    color: #eceff4;
+    border: none;
+    border-bottom: 1px solid rgba(76, 86, 106, 0.2);
+    padding: 2px 4px;
+}
+QMenuBar::item {
+    padding: 6px 12px;
+    border-radius: 8px;
+}
+QMenuBar::item:selected {
+    background: rgba(67, 76, 94, 0.6);
+}
+QMenu {
+    background: rgba(46, 52, 64, 0.92);
+    color: #eceff4;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    padding: 8px;
+}
+QMenu::item {
+    padding: 9px 32px;
+    border-radius: 10px;
+    margin: 2px 4px;
+}
+QMenu::item:selected {
+    background: rgba(67, 76, 94, 0.7);
+    color: #88c0d0;
+}
+QMenu::item:checked {
+    background: rgba(76, 86, 106, 0.5);
+}
+QMenu::separator {
+    height: 1px;
+    background: rgba(255,255,255,0.04);
+    margin: 6px 16px;
+}
+QProgressBar {
+    background: rgba(76, 86, 106, 0.25);
+    border: 1px solid rgba(255,255,255,0.03);
+    border-radius: 8px;
+    height: 8px;
+}
+QProgressBar::chunk {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #81a1c1, stop:0.33 #a3be8c, stop:0.66 #ebcb8b, stop:1 #b48ead);
+    border-radius: 8px;
+}
+QScrollBar:vertical {
+    background: transparent;
+    width: 8px;
+    border: none;
+    border-radius: 4px;
+}
+QScrollBar::handle:vertical {
+    background: rgba(76, 86, 106, 0.35);
+    min-height: 30px;
+    border-radius: 6px;
+}
+QScrollBar::handle:vertical:hover {
+    background: rgba(76, 86, 106, 0.6);
+}
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0; }
+QToolTip {
+    background: rgba(46, 52, 64, 0.92);
+    color: #eceff4;
+    border: 1px solid rgba(76, 86, 106, 0.4);
+    border-radius: 12px;
+    padding: 8px 14px;
+    font-size: 12px;
+}

@@ -1,202 +1,206 @@
-# Frint Browser
+# Frint Browser 🛡️
 
 **Privacy-first. Telemetry-free. Yours.**
 
-Frint Browser is a fully customizable, privacy-focused web browser built from the ground up to protect your digital footprint. Based on the [Ladybird](https://ladybird.org) LibWeb engine, Frint blocks trackers, strips tracking parameters, enforces HTTPS, and gives you complete control over your browsing data.
+Frint is a privacy-focused web browser built on Qt6 WebEngine, with a comprehensive privacy engine that blocks trackers, ads, and fingerprinting — right out of the box.
 
-## ✨ Features
+## Features
 
-### 🔒 Privacy (All Enabled by Default)
+### 🔒 Privacy Engine
+- **Tracker Blocker** — Blocks 200+ known tracking domains (Google Ads, Facebook/Meta, DoubleClick, Criteo, Taboola, and more)
+- **URL Parameter Cleaner** — Strips 80+ tracking parameters from URLs (`fbclid`, `gclid`, `utm_*`, `_hsenc`, and more)
+- **GPC (Global Privacy Control)** — Sends `Sec-GPC: 1` and `DNT: 1` headers on every request
+- **HTTPS-Only Mode** — Upgrades all `http://` connections to `https://`
+- **DNS-over-HTTPS (DoH)** — Encrypted DNS via Cloudflare by default
+- **Anti-Fingerprinting** — JavaScript injection spoofs Canvas, WebGL, AudioContext, fonts, timezone, hardware info, and more
+- **WebRTC IP Leak Protection** — Blocks real IP discovery via WebRTC
+- **ETag & Cache Tracking Protection** — Strips cache-based tracking identifiers
+- **Client Hints Blocking** — Removes `Sec-CH-UA-*` headers
+- **Permission Auto-Deny** — All camera, mic, geolocation, and notification requests are denied by default
+- **No Persistent Cookies** — Session-only cookies, wiped on exit
 
-| Feature | Status |
-|---------|--------|
-| HTTPS-Only Mode | ✅ Automatic HTTP→HTTPS upgrades |
-| Third-Party Cookie Blocking | ✅ Prevents cross-site tracking |
-| Tracking Parameter Removal | ✅ Strips 200+ tracking params (fbclid, gclid, utm_*, etc.) |
-| DNS-over-HTTPS (DoH) | ✅ Cloudflare, Quad9, or Google endpoints |
-| Global Privacy Control (GPC) | ✅ Sends `Sec-GPC: 1` with every request |
-| Strict Referrer Policy | ✅ Strict-origin-when-cross-origin enforced |
-| Fingerprinting Defense | ✅ Canvas, font, screen, timezone, UA spoofing |
-| Tracker Blocker | ✅ Blocks 150+ known tracking domains |
-| Storage Partitioning | ✅ Origin-hashed, SHA256-isolated storage |
-| Clear on Exit | ✅ Optional complete data erasure |
-| Do Not Track | ✅ Legacy DNT: 1 header sent |
+### 🎨 Liquid Glass UI
+- Glassmorphism design with semi-transparent elements
+- Three dark themes (Catppuccin Mocha, Nord Dark, Gruvbox Material)
+- Custom CSS overrides
+- Smooth entrance animation
 
-### 🧩 Architecture
+### 📦 Built-in Extension Support
+- Dark Reader
+- uBlock Origin Lite (compat)
+- Privacy Badger (compat)
 
-```
-┌─────────────────────────────────────────────┐
-│                 Frint Browser                │
-├─────────────────────────────────────────────┤
-│  BrowserWindow (Tabs, Toolbar, Status bar)  │
-├─────────────────────────────────────────────┤
-│  WebView (Qt6 network + placeholder render) │
-├──────────────────┬──────────────────────────┤
-│  Privacy Modules │    Storage               │
-│  ┌──────────────┐│  ┌────────────────────┐  │
-│  │ UrlCleaner   ││  │ StoragePartition   │  │
-│  │ ReferrerPol. ││  │ (Origin-hashed)    │  │
-│  │ TrackingBlk  ││  └────────────────────┘  │
-│  │ Fingerprint  ││                          │
-│  │ DnsResolver  ││  Configs                 │
-│  │ GpcHeader    ││  ┌────────────────────┐  │
-│  └──────────────┘│  │ default_prefs.json │  │
-├──────────────────┴──┴──────────────────────┤
-│  Ladybird LibWeb (optional, via -DFRINT_USE_LIBWEB=ON) │
-└─────────────────────────────────────────────┘
-```
+### 🗂️ Profile Management
+- Isolated browsing profiles with separate data
+- Quick profile switching
+- Complete data deletion
 
-### 🌐 Plugin & Theme Store
+## Screenshots
 
-A community-driven marketplace for extensions and themes is included at `store/`. See [Frint-Plugin-Theme-Store](store/README.md).
+*Coming soon*
 
-## 📋 PrivacyTests.org Compliance
-
-Frint Browser is designed to pass all [PrivacyTests.org](https://privacytests.org) test categories:
-
-- **State Partitioning** — All storage isolated by `(scheme, host, port)` tuple
-- **Navigation Tests** — Strict-origin-when-cross-origin referrer policy, window.name cleared
-- **HTTPS Tests** — HTTP→HTTPS upgrades, warnings on insecure
-- **Misc Tests** — GPC header sent, DoH enabled by default
-- **Fingerprinting Resistance** — Canvas, font, screen, timezone, UA, concurrency, memory spoofed
-- **Tracking Query Parameters** — 200+ parameters stripped
-- **Tracker Content Blocking** — 150+ domains blocked
-- **Tracking Cookie Protection** — Third-party cookies blocked, cookie partitioning
-- **Cross-session Tracking** — Clear on exit optional
-- **DNS Privacy** — DoH with Cloudflare default
-
-## 🏗️ Build Instructions
+## Installation
 
 ### Prerequisites
+- **Qt 6.6+** (Core, Widgets, Gui, Network, WebEngineWidgets)
+- **CMake 3.20+**
+- **Ninja** build system
+- **C++20** capable compiler (GCC 12+ / Clang 14+)
 
-- **Compiler:** GCC 13+ or Clang 16+ (C++20 required)
-- **CMake:** 3.20+
-- **Qt6:** Core, Widgets, Gui, Network
-- **Ninja** or Make
-
-### Arch Linux
-
-```bash
-# Install dependencies
-sudo pacman -S --needed qt6-base qt6-tools qt6-wayland cmake ninja gcc base-devel
-```
-
-### Build
+### Build from source
 
 ```bash
-# Clone and build
-git clone --recursive https://github.com/frint-browser/frint-browser.git
-cd frint-browser
+# Clone
+git clone https://github.com/qfdevel/Frint-Browser.git
+cd Frint
+
+# Build with Makefile
+make
+
+# Or with CMake directly
 mkdir build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release -GNinja
+cmake .. -G Ninja
 ninja
-```
 
-### Build with Ladybird LibWeb Integration
-
-```bash
-# First build Ladybird libraries
-cd ladybird
-mkdir Build && cd Build
-cmake .. -GNinja -DCMAKE_BUILD_TYPE=Release -DENABLE_GUI_TARGETS=ON -DBUILD_LADYBIRD=OFF -DBUILD_LAGOM=OFF
-ninja
-cd ../..
-
-# Then build Frint with LibWeb
-mkdir build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release -GNinja -DFRINT_USE_LIBWEB=ON
-ninja
-```
-
-### Run
-
-```bash
+# Run
 ./build/bin/frint_browser
-# Or with a URL
-./build/bin/frint_browser https://example.com
-# Help
-./build/bin/frint_browser --help
 ```
 
-## 🚀 Usage
-
-| Feature | How |
-|---------|-----|
-| Open URL | Type in address bar, press Enter |
-| New Tab | Click `+` or Ctrl+T |
-| Close Tab | Click `×` on tab or Ctrl+W |
-| Back/Forward | ← / → buttons |
-| Reload | ↻ button or Ctrl+R |
-| Privacy Controls | `Privacy` menu in menu bar |
-| Clear Storage | `Privacy → Clear All Storage` |
-
-## 🧪 Testing
-
-### Quick Smoke Test
+### Install system-wide
 
 ```bash
-cd build
-./bin/frint_browser https://example.com
+sudo make install
 ```
 
-### Privacy Verification
+## Usage
 
-Check the browser's console output for privacy module logging:
+### First Run
+The setup wizard will guide you through:
+1. Language selection (11 languages)
+2. Theme selection
+3. Profile creation
+4. Privacy tutorial
 
-```bash
-./bin/frint_browser 2>&1 | grep "\[Frint\]"
+### Privacy Menu
+Access quick privacy toggles from the **Privacy** menu:
+- Toggle tracker blocker
+- Toggle HTTPS-only
+- Toggle GPC
+- Toggle fingerprint defense
+- Toggle anti-fingerprinting JS
+- Toggle WebRTC blocking
+- Toggle ETag stripping
+
+### Settings Dialog
+Press the hamburger menu (☰) → **Settings** to access all options:
+- **General** — Home page, search engine, clear-on-exit
+- **Privacy** — Core privacy controls
+- **🔐 Advanced** — Individual fingerprinting toggles (Canvas, WebGL, Audio, Font, HW concurrency, etc.)
+- **📊 Dashboard** — Privacy score, session statistics, clear data, export report
+- **Appearance** — Theme selection, font size, custom CSS
+- **Profiles** — Profile management, danger zone
+- **🔄 Updates** — Download location, update checking
+- **📋 Extensions** — Enable/disable extensions
+- **ℹ️ About** — Version information, GitHub link
+
+### Keyboard Shortcuts
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl+T` | New tab |
+| `Ctrl+W` | Close tab |
+| `Ctrl+R` | Reload |
+| `Ctrl+L` | Focus address bar |
+| `Ctrl+Q` | Quit |
+| `Ctrl+=` / `Ctrl+-` | Zoom in/out |
+| `Ctrl+0` | Reset zoom |
+| `Alt+Left` / `Alt+Right` | Back / Forward |
+| `Alt+Home` | Home page |
+| `F6` | Focus address bar |
+| `F11` | Full screen |
+| `F12` | DevTools |
+
+## Project Structure
+
 ```
-
-## 📁 Project Structure
-
-```
-frint-browser/
-├── CMakeLists.txt          # Build system (Qt6 + optional Ladybird)
+Frint/
+├── CMakeLists.txt        # CMake build configuration
+├── Makefile              # Convenience build wrapper
+├── resources.qrc         # Qt resource bundle
 ├── src/
-│   ├── main.cpp            # Entry point
-│   ├── browser_window.*    # Tabbed browser UI
-│   ├── web_view.*          # Web rendering widget
-│   ├── settings_manager.*  # JSON-backed preferences
+│   ├── main.cpp          # Entry point, first-run wizard
+│   ├── browser_window.*  # Main window, toolbar, menus, animations
+│   ├── web_view.*        # WebEngine view, privacy integration
+│   ├── settings_dialog.* # Settings UI (9 tabs)
+│   ├── settings_manager.*# Persistent settings (QSettings)
+│   ├── setup_wizard.*    # First-run wizard
 │   ├── privacy/
-│   │   ├── url_cleaner.*   # Tracking parameter removal
-│   │   ├── referrer_policy.* # Referrer header enforcement
-│   │   ├── tracking_blocker.* # Domain-based tracker blocking
-│   │   ├── fingerprinting_defender.* # Anti-fingerprinting
-│   │   ├── dns_resolver.*  # DNS-over-HTTPS
-│   │   └── gpc_header.*    # Global Privacy Control
+│   │   ├── url_cleaner.*           # Tracking URL parameter stripping
+│   │   ├── tracking_blocker.*      # Known tracker domain blocking
+│   │   ├── gpc_header.*            # GPC/DNT headers
+│   │   ├── referrer_policy.*       # Strict referrer policy
+│   │   ├── dns_resolver.*          # DNS-over-HTTPS resolver
+│   │   ├── fingerprinting_defender.*# User-agent spoofing
+│   │   └── privacy_url_interceptor.*# Request-level interceptor
 │   └── storage/
-│       └── storage_partition.* # Origin-isolated storage
+│       └── storage_partition.*     # Storage isolation
+├── resources/
+│   ├── privacy/
+│   │   ├── anti_fingerprint.js     # Anti-fingerprinting script
+│   │   ├── cosmetic_blocker.js     # Ad-blocking CSS injection
+│   │   ├── tracking_domains.txt    # 25K tracking domains list
+│   │   ├── tracking_params.txt     # 41K tracking parameters list
+│   │   └── user_agents.txt         # User-agent spoofing list
+│   ├── fonts/                      # Bundled fonts (Inter, JetBrains Mono)
+│   ├── icons/                      # Application icons
+│   ├── help/                       # Onboarding pages
+│   └── samples/                    # Demo HTML pages
+├── store/
+│   ├── themes/            # Theme CSS files
+│   ├── extensions/        # Bundled extensions
+│   └── store.json         # Extension store manifest
 ├── configs/
-│   └── default_prefs.json  # Default settings
-├── store/                  # Plugin & Theme Store
-├── ladybird/               # Ladybird submodule
-└── resources/              # Icons & assets
+│   └── default_prefs.json # Default settings
+└── logo/
+    └── logo.png           # Application logo
 ```
 
-## 📄 License
+## Privacy Test Results
 
-GNU General Public License v3.0 (GPL-3.0)
+Frint aims for maximum scores on all major privacy testing tools:
 
-See [LICENSE](LICENSE) for details.
+- **Cover Your Tracks** (EFF) — Full protection against all tracking categories
+- **Ad Blocker Test** (turtlecute.org) — Blocks ads, analytics, social trackers, error trackers, OEM trackers, and more
+- **DNS Leak Test** — All DNS queries through encrypted DoH
 
-## 🤝 Contributing
+### Trackers Blocked
+- Google Ads/DoubleClick ecosystem
+- Facebook/Meta pixels
+- Twitter/X analytics
+- Amazon ad systems
+- Microsoft/Bing ads
+- Adobe Audience Manager
+- AppNexus/Xandr
+- Criteo, Taboola, Outbrain
+- LinkedIn, TikTok, Pinterest, Reddit, Snapchat
+- Yahoo, Yandex, Unity Ads
+- Media.net, AdColony
+- Google Analytics, Hotjar, MouseFlow, LuckyOrange, FreshWorks
+- BugSnag, Sentry, Rollbar, Datadog
+- All major error trackers and analytics platforms
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on:
-- Code style
-- Commit messages
-- Pull requests
-- Testing requirements
-- Security reporting
+## License
 
-## 🔗 Links
+GNU General Public License v3.0 — see [LICENSE](LICENSE) for details.
 
-- [Ladybird Browser](https://ladybird.org)
-- [PrivacyTests.org](https://privacytests.org)
-- [Plugin & Theme Store](store/README.md)
+## Contributing
 
-## 🙏 Acknowledgments
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-- The [Ladybird](https://ladybird.org) team for their amazing browser engine
-- [PrivacyTests.org](https://privacytests.org) for comprehensive testing methodology
-- [Catppuccin](https://catppuccin.com) for the theme color inspiration
-- All open-source contributors who make privacy-respecting software possible
+## Support
+
+- GitHub Issues: [github.com/qfdevel/Frint-Browser/issues](https://github.com/qfdevel/Frint-Browser/issues)
+- GitHub Repository: [github.com/qfdevel/Frint-Browser](https://github.com/qfdevel/Frint-Browser)
+
+---
+
+*Built with Qt ${QT_VERSION_STR} and the Frint Privacy Engine*

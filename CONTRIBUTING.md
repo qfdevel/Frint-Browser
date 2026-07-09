@@ -1,103 +1,151 @@
 # Contributing to Frint Browser
 
-Thank you for your interest in contributing! Frint Browser is a privacy-first project, and every contribution helps make the web safer.
+First off, thank you for considering contributing! Frint is a community-driven project focused on creating a truly private, independent web browser.
 
 ## Code of Conduct
 
-Be respectful, inclusive, and constructive. We don't tolerate harassment, discrimination, or toxicity.
-
-## Getting Started
-
-1. Fork the repository
-2. Clone your fork: `git clone --recursive https://github.com/your-username/frint-browser.git`
-3. Build the project (see README.md)
-4. Create a branch: `git checkout -b my-feature`
-5. Make changes
-6. Test thoroughly
-7. Submit a pull request
+- Be respectful and inclusive
+- Focus on what's best for the project and its users
+- Help others learn and grow
 
 ## Code Style
 
 ### C++
 
-- Use C++20 features where appropriate
-- Follow the existing code style (snake_case for functions/variables, PascalCase for classes)
-- Use Qt6 conventions (signals/slots, Q_OBJECT macro)
-- 4-space indentation, no tabs
-- Maximum line length: 100 characters
-- Include guards: `#ifndef FRINT_MODULE_NAME_H`
-- Add `qDebug()` logging for key operations prefixed with `[Frint ModuleName]`
+- **Standard**: C++20
+- **Formatting**: Use 4-space indentation, no tabs
+- **Naming**:
+  - Classes: PascalCase (`WebView`, `HtmlRenderer`)
+  - Methods: camelCase (`loadUrl()`, `parseHtml()`)
+  - Variables: camelCase (`m_currentUrl`, `m_scrollY`)
+  - Constants: PascalCase with underscore prefix for members
+- **Headers**: Use `#ifndef` guards with format `FRINT_MODULE_FILE_H`
+- **Includes**: Group in order: project headers, Qt headers, system headers
+- **Braces**: Allman style for functions, K&R for control flow
+- **Comments**: Use `//` for single-line, `/* */` for documentation blocks
+- **Nullptr**: Use `nullptr`, never `NULL` or `0`
 
-### Privacy Modules
+### Example
+```cpp
+#ifndef FRINT_WEB_VIEW_H
+#define FRINT_WEB_VIEW_H
 
-Each privacy module must:
-1. Have a singleton accessor (`static ClassName &instance()`)
-2. Be toggleable at runtime (`setEnabled(bool)`)
-3. Log its operations to `qDebug` with `[Frint ModuleName]` prefix
-4. Be controllable via `SettingsManager`
-5. Have configuration keys in `configs/default_prefs.json`
+#include <QWidget>
+#include <QUrl>
 
-### Commit Messages
+namespace Frint {
+
+class WebView : public QWidget {
+    Q_OBJECT
+
+public:
+    explicit WebView(QWidget *parent = nullptr);
+    ~WebView() override;
+
+    void loadUrl(const QUrl &url);
+    QUrl currentUrl() const { return m_currentUrl; }
+
+signals:
+    void urlChanged(const QUrl &url);
+
+private:
+    QUrl m_currentUrl;
+};
+
+} // namespace Frint
+
+#endif
+```
+
+### JavaScript (for extensions)
+- **Standard**: ES6+
+- **Formatting**: 2-space indentation
+- **Naming**: camelCase for functions/variables, PascalCase for classes
+- **Semicolons**: Required
+
+## Commit Format
 
 ```
-<type>: <short description>
+<type>(<scope>): <description>
 
-<optional detailed description>
+<optional body>
 
-<optional issue reference>
+<optional footer>
 ```
 
-Types:
-- `feat:` — New feature
-- `fix:` — Bug fix
-- `privacy:` — Privacy enhancement
-- `docs:` — Documentation
-- `refactor:` — Code restructuring
-- `build:` — Build system changes
-- `store:` — Plugin/theme store changes
+Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`
 
 Examples:
 ```
-feat: add DNS-over-HTTPS support with Cloudflare endpoint
-fix: handle redirect responses correctly in WebView
-privacy: expand tracking parameter list to 200+ entries
+feat(renderer): add flexbox layout support
+fix(privacy): correct GPC header format for Cloudflare
+docs(README): update build instructions for macOS
 ```
 
 ## Pull Request Process
 
-1. Ensure the project builds with zero warnings
-2. Test with `./build/bin/frint_browser`
-3. Verify privacy modules log correctly: `./build/bin/frint_browser 2>&1 | grep "\[Frint\]"`
-4. Update README.md if adding new features
-5. Update CHANGELOG.md with your changes
-6. Add appropriate labels (privacy, enhancement, bug, etc.)
+1. Create a feature branch from `main`
+2. Make your changes following the code style
+3. Ensure the project builds: `ninja`
+4. Test your changes with real web pages
+5. Update documentation if needed
+6. Submit a PR with a clear description of changes
 
 ## Testing Requirements
 
-All contributions must:
-- **Build cleanly** — No compilation errors or warnings
-- **Run without crashes** — Browser opens, navigation works
-- **Maintain privacy** — Existing privacy features must still pass PrivacyTests.org scenarios
+- All new rendering features should be tested with a sample HTML file
+- Privacy module changes should verify no regressions in existing protections
+- JavaScript engine changes should not break existing page rendering
+- Performance-sensitive changes should include benchmark data
 
-For privacy-related changes, provide:
-- What PrivacyTests.org test it addresses
-- Verification steps with console output
+## Project Structure
 
-## Security Reporting
+```
+src/
+├── main.cpp                 # Application entry point
+├── browser_window.h/cpp     # Main browser window (tabs, toolbar, menus)
+├── web_view.h/cpp           # Web content area (networking + rendering)
+├── settings_manager.h/cpp   # User settings persistence
+├── privacy/                 # Privacy protection modules
+│   ├── url_cleaner.h/cpp    # Tracking parameter removal
+│   ├── referrer_policy.h/cpp # Referrer policy enforcement
+│   ├── tracking_blocker.h/cpp # Domain-based tracking protection
+│   ├── fingerprinting_defender.h/cpp # Anti-fingerprinting
+│   ├── dns_resolver.h/cpp   # DNS-over-HTTPS
+│   └── gpc_header.h/cpp     # Global Privacy Control
+├── storage/                 # Storage partitioning
+│   ├── storage_partition.h/cpp
+│   ├── session_storage.h/cpp
+│   └── local_storage.h/cpp
+└── renderer/                # Rendering engine
+    ├── html_renderer.h/cpp  # Pipeline orchestrator
+    ├── dom/                 # DOM implementation
+    ├── css/                 # CSS engine
+    ├── layout/              # Layout engine
+    ├── rendering/           # QPainter rendering
+    ├── javascript/          # Duktape JS engine
+    └── network/             # Network layer
+```
 
-**Do not file public issues for security vulnerabilities.**
+## Reporting Issues
 
-Send security reports to: security@frintbrowser.dev
+- Use GitHub Issues
+- Include the URL you were visiting
+- Describe expected vs actual behavior
+- Include error messages if any
+- Mention your OS and Frint version
 
-We will:
-- Acknowledge receipt within 48 hours
-- Provide a timeline for fix
-- Credit you in the release notes
+## Feature Requests
 
-## Adding to the Plugin/Theme Store
+- Check existing issues first
+- Describe the use case, not just the solution
+- Consider privacy implications
 
-See `store/README.md` for instructions on submitting themes and extensions.
+## Security
 
-## License
+If you discover a security vulnerability:
+- Do NOT open a public issue
+- Email the maintainers directly
+- Allow 48 hours for response before disclosure
 
-By contributing, you agree that your contributions will be licensed under GPL-3.0.
+Thank you for helping make Frint better! ❤️
