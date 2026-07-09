@@ -65,6 +65,12 @@ ninja
 # Run
 ./build/bin/frint_browser
 ```
+### Downloading with npm
+
+```bash
+sudo npm install -g @qfdevel/frint-browser
+frint-browser
+```
 
 ### Install system-wide
 
