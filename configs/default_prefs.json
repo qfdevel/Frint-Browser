@@ -1,0 +1,30 @@
+{
+    "_comment": "Frint Browser - Default Privacy Preferences",
+
+    "https_only": true,
+    "third_party_cookies_blocked": true,
+    "fingerprinting_protection": true,
+    "gpc_enabled": true,
+    "tracking_blocker": true,
+    "doh_enabled": true,
+    "clear_on_exit": false,
+
+    "referrer_policy": "strict-origin-when-cross-origin",
+    "doh_endpoint": "https://cloudflare-dns.com/dns-query",
+
+    "home_page": "about:blank",
+    "search_engine": "https://duckduckgo.com/?q=",
+
+    "javascript_enabled": true,
+    "cookies_enabled": true,
+
+    "max_tabs": 100,
+    "download_path": "",
+
+    "user_agent_spoofing": true,
+    "webrtc_leak_protection": true,
+
+    "theme": "dark",
+    "font_size": 16,
+    "zoom_level": 1.0
+}

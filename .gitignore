@@ -1,0 +1,50 @@
+# Build directories
+build/
+Build/
+cmake-build*/
+
+# Object files
+*.o
+*.obj
+*.a
+*.so
+*.dll
+*.dylib
+*.lib
+*.exp
+
+# Compiled binaries
+*.exe
+*.out
+*.app
+
+# CMake generated
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+ninja.build
+*.ninja
+
+# IDE files
+.idea/
+*.user
+*.pro.user*
+.vscode/
+*.swp
+*.swo
+
+# Qt Creator
+*.autosave
+*.kdevses
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local settings overrides
+configs/*.local.json
+
+# Memory / runtime
+*.log
+core
