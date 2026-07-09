@@ -209,4 +209,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ---
 
-*Built with Qt ${QT_VERSION_STR} and the Frint Privacy Engine*
+*Built with Qt 6.8.2 and the Frint Privacy Engine*
