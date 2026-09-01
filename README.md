@@ -1,4 +1,4 @@
-# Frint Browser 🛡️
+# Frint Browser 
 
 **Privacy-first. Telemetry-free. Yours.**
 
